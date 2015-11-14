@@ -3,7 +3,11 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 
+#ifdef _WIN32
+#include "getopt.h"
+#else
 #include <getopt.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 

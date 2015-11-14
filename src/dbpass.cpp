@@ -5,9 +5,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 
+
+#ifndef _WIN32
+#include <getopt.h>
 #include "trotl.h"
+using namespace trotl;
+#else
+#include "getopt_long.h"
+#endif
 
 #include <string>
 #include <ostream>
@@ -15,7 +21,7 @@
 #include "common.h"
 #include "dbutils.h"
 
-using namespace trotl;
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -24,6 +30,7 @@ int main(int argc, char *argv[])
 	static int verbose_flag = 0;
 	std::string password, dbid;
 	unsigned password_length;
+#if 1
 	while (1)
 	{
 		static struct option long_options[] = {
@@ -71,6 +78,7 @@ int main(int argc, char *argv[])
 	}
 	if (verbose_flag)
 		puts ("verbose flag is set");
+#endif
 
 	if (password.empty())
 	{
@@ -84,6 +92,7 @@ int main(int argc, char *argv[])
 		password_length = nchr;
 	}
 
+#ifndef _WIN32
 	if (dbid.empty())
 	try
 	{ // connect / as sysdba
@@ -105,6 +114,7 @@ int main(int argc, char *argv[])
 		std::cerr << e.what();
 		return -1;
 	}			
+#endif
 
 	BN_CTX *ctx = BN_CTX_new();
 	int rc;

@@ -1,6 +1,16 @@
 #pragma once
 
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include <stdio.h>
 
 //#define DBPASS_BITS 32

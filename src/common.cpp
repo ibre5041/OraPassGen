@@ -13,7 +13,7 @@ void begin_read_password()
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode = 0;
     GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+	SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
 #else
     termios oldt;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -29,7 +29,7 @@ void end_read_password()
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode = 0;
     GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode | ENABLE_ECHO_INPUT);
+    SetConsoleMode(hStdin, mode | ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
 #else
     termios oldt;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -45,10 +45,37 @@ void end_read_password()
 
 ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp)
 {
-	while( ( pass[i]=getch() ) != '\n' && pass[i] != '\r' && i<19 )
-	{putchar('*'); i++;}
-	pass[i]='\0';
-	cout<<endl;
+	// Set the console mode to no-echo, not-line-buffered input
+	DWORD mode, count;
+	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (!GetConsoleMode(hStdin, &mode))
+		return 0;
+	SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
+
+	char c;
+	size_t idx = 0;
+	while (ReadConsoleA(hStdin, &c, 1, &count, NULL) && (c != '\r') && (c != '\n') && idx < sz)
+	{
+		if (c == '\b') // Backspace
+		{
+			if (idx)
+			{
+				WriteConsoleA(hStdout, "\b \b", 3, &count, NULL);
+				(*pw)[--idx] = 0;
+			}
+		}
+		else
+		{
+			WriteConsoleA(hStdout, "*", 1, &count, NULL);
+			(*pw)[idx++] = c;
+		}
+	}
+
+	// Restore the console mode
+	SetConsoleMode(hStdin, mode);
+	(*pw)[idx] = 0; /* null-terminate   */
+	return idx;
 }
 
 #else
