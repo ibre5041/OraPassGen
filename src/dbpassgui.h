@@ -4,56 +4,36 @@
 #include <QDialog>
 
 class QAction;
-class QCheckBox;
-class QComboBox;
-class QGroupBox;
 class QLabel;
 class QLineEdit;
 class QMenu;
 class QPushButton;
-class QSpinBox;
-class QTextEdit;
 
-class Window : public QDialog
+#include "ui_dbpassguiui.h"
+
+class DbPassGui : public QDialog, public Ui_DbPassGui
 {
 	Q_OBJECT
 
 public:
-	Window();
+	DbPassGui(QWidget * parent = 0);
 
 	void setVisible(bool visible);
+
+public slots:
+	void showNormal();
+	void hide();
 
 protected:
 	void closeEvent(QCloseEvent *event);
 
 private slots:
-	void setIcon(int index);
 	void iconActivated(QSystemTrayIcon::ActivationReason reason);
-	void showMessage();
-	void messageClicked();
+	void generatePressed();
 
 private:
-	void createIconGroupBox();
-	void createMessageGroupBox();
 	void createActions();
 	void createTrayIcon();
-
-	QGroupBox *iconGroupBox;
-	QLabel *iconLabel;
-	QComboBox *iconComboBox;
-	QCheckBox *showIconCheckBox;
-
-	QGroupBox *messageGroupBox;
-	QLabel *typeLabel;
-	QLabel *durationLabel;
-	QLabel *durationWarningLabel;
-	QLabel *titleLabel;
-	QLabel *bodyLabel;
-	QComboBox *typeComboBox;
-	QSpinBox *durationSpinBox;
-	QLineEdit *titleEdit;
-	QTextEdit *bodyEdit;
-	QPushButton *showMessageButton;
 
 	QAction *minimizeAction;
 	QAction *maximizeAction;

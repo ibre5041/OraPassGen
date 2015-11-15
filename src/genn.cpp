@@ -4,7 +4,7 @@
 #include <openssl/pem.h>
 
 #ifdef _WIN32
-#include "getopt.h"
+#include "getopt_long.h"
 #else
 #include <getopt.h>
 #endif
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	/* Flag set by "--verbose". */
 	static int verbose_flag = 0;
 	bool base64_flg, binary_flg, decimal_flg, hex_flg;
-	base64_flg = binary_flg = decimal_flg, hex_flg = false;
+	base64_flg = binary_flg = decimal_flg = hex_flg = false;
 	std::string filename;
 	int c;
 	while (1)

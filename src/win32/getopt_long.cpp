@@ -39,13 +39,18 @@
 #include "getopt_long.h"
 
 #ifndef HAVE_INT_OPTRESET
-int			optreset;
+//int			optreset;
 #endif
 
 #define BADCH	'?'
 #define BADARG	':'
 #define EMSG	""
 
+int     opterr = 1,             /* if error message should be printed */
+        optind = 1,             /* index into parent argv vector */
+        optopt,                 /* character checked for validity */
+        optreset;               /* reset getopt */
+char    *optarg;                /* argument associated with option */
 
 int
 getopt_long(int argc, char *const argv[],
@@ -156,7 +161,7 @@ getopt_long(int argc, char *const argv[],
 	/* short option */
 	optopt = (int) *place++;
 
-	oli = strchr(optstring, optopt);
+	oli = (char*)strchr(optstring, optopt);
 	if (!oli)
 	{
 		if (!*place)

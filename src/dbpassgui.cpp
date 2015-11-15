@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 
 #include <string>
 #include <ostream>
@@ -25,49 +24,46 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
+	if (QCoreApplication::organizationName().isEmpty())
+		QCoreApplication::setOrganizationName("OraDbPass");
+	if (QCoreApplication::organizationDomain().isEmpty())
+		QCoreApplication::setOrganizationDomain("OraDbPass");
+	if (QCoreApplication::applicationName().isEmpty())
+		QCoreApplication::setApplicationName("OraDbPass");
+
 	if (!QSystemTrayIcon::isSystemTrayAvailable()) {
 		QMessageBox::critical(0, QObject::tr("Systray"), QObject::tr("I couldn't detect any system tray on this system."));
 		return 1;
 	}
 	QApplication::setQuitOnLastWindowClosed(false);
 
-	Window window;
-	window.show();
+	DbPassGui dbpassgui;
+	dbpassgui.show();
 	return app.exec();	
 }
 
-Window::Window()
+DbPassGui::DbPassGui(QWidget * parent)
+	: QDialog(parent)
 {
-	createIconGroupBox();
-	createMessageGroupBox();
+	setupUi(this);
+	dbidEdit->setInputMask("99999999999999999999999999999999999999");
 
-	iconLabel->setMinimumWidth(durationLabel->sizeHint().width());
+	QSettings s;
+	s.beginGroup("DbPassGui");
+	restoreGeometry(s.value("geometry", QByteArray()).toByteArray());
+	s.endGroup();
 
 	createActions();
 	createTrayIcon();
 
-	connect(showMessageButton, SIGNAL(clicked()), this, SLOT(showMessage()));
-	connect(showIconCheckBox, SIGNAL(toggled(bool)),
-		trayIcon, SLOT(setVisible(bool)));
-	connect(iconComboBox, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(setIcon(int)));
-	connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
 	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	mainLayout->addWidget(iconGroupBox);
-	mainLayout->addWidget(messageGroupBox);
-	setLayout(mainLayout);
-
-	iconComboBox->setCurrentIndex(1);
-	trayIcon->show();
-
-	setWindowTitle(tr("Systray"));
-	resize(400, 300);
+	connect(generateButton, SIGNAL(pressed()), this, SLOT(generatePressed()));
+	setWindowIcon(QIcon(":/images/data-storage4.svg"));
+	setWindowTitle(tr("DbPass"));
 }
 
-void Window::setVisible(bool visible)
+void DbPassGui::setVisible(bool visible)
 {
 	minimizeAction->setEnabled(visible);
 	maximizeAction->setEnabled(!isMaximized());
@@ -75,141 +71,75 @@ void Window::setVisible(bool visible)
 	QDialog::setVisible(visible);
 }
 
-void Window::closeEvent(QCloseEvent *event)
+void DbPassGui::showNormal()
 {
+	QSettings s;
+	s.beginGroup("DbPassGui");
+	restoreGeometry(s.value("geometry", QByteArray()).toByteArray());
+	s.endGroup();
+	QDialog::showNormal();
+}
+
+void DbPassGui::hide()
+{
+	QSettings s;
+	s.beginGroup("DbPassGui");
+	s.setValue("geometry", saveGeometry());
+	s.endGroup();
+	QDialog::hide();
+}
+
+void DbPassGui::closeEvent(QCloseEvent *event)
+{
+	QSettings s;
+	s.beginGroup("DbPassGui");
+	bool notificationShown = s.value("notification", false).toBool();
 	if (trayIcon->isVisible()) {
-		QMessageBox::information(this, tr("Systray"),
-					 tr("The program will keep running in the "
-					                                        "system tray. To terminate the program, "
-					                                        "choose <b>Quit</b> in the context menu "
-					    "of the system tray entry."));
+		if (!notificationShown) {
+			QMessageBox::information(this, tr("Systray"),
+				tr("The program will keep running in the "
+					"system tray. To terminate the program, "
+					"choose <b>Quit</b> in the context menu "
+					"of the system tray entry."));
+			s.setValue("notification", true);
+		}
 		hide();
 		event->ignore();
 	}
+	s.endGroup();
 }
 
-void Window::setIcon(int index)
-{
-	QIcon icon = iconComboBox->itemIcon(index);
-	trayIcon->setIcon(icon);
-	setWindowIcon(icon);
-
-	trayIcon->setToolTip(iconComboBox->itemText(index));
-}
-
-void Window::iconActivated(QSystemTrayIcon::ActivationReason reason)
+void DbPassGui::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
 	switch (reason) {
+	case QSystemTrayIcon::Unknown:
 	case QSystemTrayIcon::Trigger:
 	case QSystemTrayIcon::DoubleClick:
-		iconComboBox->setCurrentIndex((iconComboBox->currentIndex() + 1)
-					      % iconComboBox->count());
-		break;
 	case QSystemTrayIcon::MiddleClick:
-		showMessage();
+		if (isVisible())
+			hide();
+		else
+			showNormal();
 		break;
 	default:
 		;
 	}
 }
 
-void Window::showMessage()
+void DbPassGui::generatePressed()
 {
-	QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::MessageIcon(
-		typeComboBox->itemData(typeComboBox->currentIndex()).toInt());
-	trayIcon->showMessage(titleEdit->text(), bodyEdit->toPlainText(), icon,
-			      durationSpinBox->value() * 1000);
+	QString dbid = dbidEdit->text();
+	QString pass = passwordEdit->text();
+	std::string utf8_dbid = dbid.toStdString();
+	std::string utf8_pass = pass.toStdString();
+	std::string gen = genpasswd(utf8_dbid, utf8_pass);
+
+	QClipboard *p_Clipboard = QApplication::clipboard();
+	p_Clipboard->setText(gen.c_str());
+	passwordEdit->setText(gen.c_str());	
 }
 
-void Window::messageClicked()
-{
-	QMessageBox::information(0, tr("Systray"),
-				 tr("Sorry, I already gave what help I could.\n"
-				    "Maybe you should try asking a human?"));
-}
-
-void Window::createIconGroupBox()
-{
-	iconGroupBox = new QGroupBox(tr("Tray Icon"));
-
-	iconLabel = new QLabel("Icon:");
-
-	iconComboBox = new QComboBox;
-	iconComboBox->addItem(QIcon(":/images/bad.svg"), tr("Bad"));
-	iconComboBox->addItem(QIcon(":/images/heart.svg"), tr("Heart"));
-	iconComboBox->addItem(QIcon(":/images/trash.svg"), tr("Trash"));
-
-	showIconCheckBox = new QCheckBox(tr("Show icon"));
-	showIconCheckBox->setChecked(true);
-
-	QHBoxLayout *iconLayout = new QHBoxLayout;
-	iconLayout->addWidget(iconLabel);
-	iconLayout->addWidget(iconComboBox);
-	iconLayout->addStretch();
-	iconLayout->addWidget(showIconCheckBox);
-	iconGroupBox->setLayout(iconLayout);
-}
-
-void Window::createMessageGroupBox()
-{
-	messageGroupBox = new QGroupBox(tr("Balloon Message"));
-
-	typeLabel = new QLabel(tr("Type:"));
-
-	typeComboBox = new QComboBox;
-	typeComboBox->addItem(tr("None"), QSystemTrayIcon::NoIcon);
-	typeComboBox->addItem(style()->standardIcon(
-				      QStyle::SP_MessageBoxInformation), tr("Information"),
-			      QSystemTrayIcon::Information);
-	typeComboBox->addItem(style()->standardIcon(
-				      QStyle::SP_MessageBoxWarning), tr("Warning"),
-			      QSystemTrayIcon::Warning);
-	typeComboBox->addItem(style()->standardIcon(
-				      QStyle::SP_MessageBoxCritical), tr("Critical"),
-			      QSystemTrayIcon::Critical);
-	typeComboBox->setCurrentIndex(1);
-
-	durationLabel = new QLabel(tr("Duration:"));
-
-	durationSpinBox = new QSpinBox;
-	durationSpinBox->setRange(5, 60);
-	durationSpinBox->setSuffix(" s");
-	durationSpinBox->setValue(15);
-
-	durationWarningLabel = new QLabel(tr("(some systems might ignore this "
-					     "hint)"));
-	durationWarningLabel->setIndent(10);
-
-	titleLabel = new QLabel(tr("Title:"));
-
-	titleEdit = new QLineEdit(tr("Cannot connect to network"));
-
-	bodyLabel = new QLabel(tr("Body:"));
-
-	bodyEdit = new QTextEdit;
-	bodyEdit->setPlainText(tr("Don't believe me. Honestly, I don't have a "
-				  "clue.\nClick this balloon for details."));
-
-	showMessageButton = new QPushButton(tr("Show Message"));
-	showMessageButton->setDefault(true);
-
-	QGridLayout *messageLayout = new QGridLayout;
-	messageLayout->addWidget(typeLabel, 0, 0);
-	messageLayout->addWidget(typeComboBox, 0, 1, 1, 2);
-	messageLayout->addWidget(durationLabel, 1, 0);
-	messageLayout->addWidget(durationSpinBox, 1, 1);
-	messageLayout->addWidget(durationWarningLabel, 1, 2, 1, 3);
-	messageLayout->addWidget(titleLabel, 2, 0);
-	messageLayout->addWidget(titleEdit, 2, 1, 1, 4);
-	messageLayout->addWidget(bodyLabel, 3, 0);
-	messageLayout->addWidget(bodyEdit, 3, 1, 2, 4);
-	messageLayout->addWidget(showMessageButton, 5, 4);
-	messageLayout->setColumnStretch(3, 1);
-	messageLayout->setRowStretch(4, 1);
-	messageGroupBox->setLayout(messageLayout);
-}
-
-void Window::createActions()
+void DbPassGui::createActions()
 {
 	minimizeAction = new QAction(tr("Mi&nimize"), this);
 	connect(minimizeAction, SIGNAL(triggered()), this, SLOT(hide()));
@@ -224,7 +154,7 @@ void Window::createActions()
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
-void Window::createTrayIcon()
+void DbPassGui::createTrayIcon()
 {
 	trayIconMenu = new QMenu(this);
 	trayIconMenu->addAction(minimizeAction);
@@ -235,4 +165,8 @@ void Window::createTrayIcon()
 
 	trayIcon = new QSystemTrayIcon(this);
 	trayIcon->setContextMenu(trayIconMenu);
+
+	trayIcon->setToolTip("DBA Pass");
+	trayIcon->setIcon(QIcon(":/images/data-storage4.svg"));
+	trayIcon->show();
 }

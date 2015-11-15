@@ -1,79 +1,146 @@
 #include "common.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <termios.h>
-#include <unistd.h>
-#endif
+#include <openssl/bn.h>
+#include <openssl/md5.h>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
 
-void begin_read_password()
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+string genpasswd(string const& dbid, string const& passphrase)
 {
-#ifdef _WIN32
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD mode = 0;
-    GetConsoleMode(hStdin, &mode);
-	SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
-#else
-    termios oldt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    termios newt = oldt;
-    newt.c_lflag &= ~ECHO;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-#endif
+	BN_CTX *ctx = BN_CTX_new();
+	int rc;
+
+	// use password hash has number a
+	unsigned char *md5 = MD5((unsigned char*)passphrase.c_str(), passphrase.size(), NULL);
+	BIGNUM *a = BN_bin2bn(md5, 16, NULL);
+	char *a_char = BN_bn2hex(a);
+	printf("m %s\n", a_char);
+
+	// use dbid as exponent p
+	BIGNUM *p = BN_new();
+	rc = BN_dec2bn(&p, dbid.c_str());
+	char *p_char = BN_bn2dec(p);
+	printf("p %s\n", p_char);
+
+	// read n from file
+	unsigned char *buffer;
+	long int buffer_len;
+	{
+		FILE* file = fopen("genn.bin", "r");
+		if (!file)
+		{
+			fprintf(stderr, "File not found: genn.bin");
+			return "";
+		}
+		fseek(file, 0L, SEEK_END);
+		buffer_len = ftell(file);
+		buffer = (unsigned char*)malloc(buffer_len);
+		fseek(file, 0L, SEEK_SET);
+		size_t read = fread(buffer, buffer_len, 1, file);
+		fclose(file);
+	}
+	BIGNUM *n = BN_new();
+	n = BN_bin2bn(buffer, buffer_len, n);
+	char *n_char = BN_bn2dec(n);
+	printf("n %s\n", n_char);
+
+	BIGNUM *r = BN_new();
+	rc = BN_mod_exp(r, a, p, n, ctx);
+	char *r_char = BN_bn2dec(r);
+	printf("r %s\n", r_char);
+
+	OPENSSL_free(a_char);
+	OPENSSL_free(p_char);
+	OPENSSL_free(n_char);
+	OPENSSL_free(r_char);
+	BN_CTX_free(ctx);
+	BN_free(r);
+	BN_free(a);
+	BN_free(n);
+	return r_char;
 }
 
-void end_read_password()
-{
-#ifdef _WIN32
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD mode = 0;
-    GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode | ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
-#else
-    termios oldt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    termios newt = oldt;
-    newt.c_lflag |= ECHO;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-#endif
-}
-
 #ifdef _WIN32
 #include <windows.h>
-#include<conio.h>
+#include <conio.h>
+#include <io.h>
+//#include <unistd.h>
+
+std::string exec(std::string cmd) {
+	FILE * pipe = _popen(cmd.c_str(), "r");
+	if (!pipe) return "ERROR";
+	char buffer[128];
+	std::string result = "";
+	while (!feof(pipe)) {
+		if (fgets(buffer, 128, pipe) != NULL)
+			result += buffer;
+	}
+	_pclose(pipe);
+	return result;
+}
 
 ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp)
 {
-	// Set the console mode to no-echo, not-line-buffered input
+
 	DWORD mode, count;
+	size_t idx = 0;
 	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (!GetConsoleMode(hStdin, &mode))
-		return 0;
-	SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
-
-	char c;
-	size_t idx = 0;
-	while (ReadConsoleA(hStdin, &c, 1, &count, NULL) && (c != '\r') && (c != '\n') && idx < sz)
+	if (GetConsoleMode(hStdin, &mode))
 	{
-		if (c == '\b') // Backspace
+		// Set the console mode to no-echo, not-line-buffered input
+		SetConsoleMode(hStdin, mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
+		char c;
+		while (ReadConsoleA(hStdin, &c, 1, &count, NULL) && (c != '\r') && (c != '\n') && idx < sz)
 		{
-			if (idx)
+			if (c == '\b') // Backspace
 			{
-				WriteConsoleA(hStdout, "\b \b", 3, &count, NULL);
-				(*pw)[--idx] = 0;
+				if (idx)
+				{
+					WriteConsoleA(hStdout, "\b \b", 3, &count, NULL);
+					(*pw)[--idx] = 0;
+				}
+			}
+			else
+			{
+				WriteConsoleA(hStdout, "*", 1, &count, NULL);
+				(*pw)[idx++] = c;
 			}
 		}
-		else
+		// Restore the console mode
+		SetConsoleMode(hStdin, mode);
+		std::cout << "Console mode restored" << std::endl;
+	} else {
+		// Cygwin path
+		char c = 0;
+		fflush(stdout);
+		std::string current = exec("stty -g");
+		exec("stty raw -echo");
+
+		while (_read(0, &c, 1) && (c != '\r') && (c != '\n') && idx < sz)
 		{
-			WriteConsoleA(hStdout, "*", 1, &count, NULL);
-			(*pw)[idx++] = c;
+			if (c == '\b') // Backspace
+			{
+				if (idx)
+				{
+					//_write(2, "\b \b", 3);
+					(*pw)[--idx] = 0;
+				}
+			}
+			else
+			{
+				_write(2, "*", 1);
+				(*pw)[idx++] = c;
+			}
 		}
+		exec("stty " + current);
 	}
 
-	// Restore the console mode
-	SetConsoleMode(hStdin, mode);
 	(*pw)[idx] = 0; /* null-terminate   */
 	return idx;
 }
