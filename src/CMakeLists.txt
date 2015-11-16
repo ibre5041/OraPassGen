@@ -8,7 +8,7 @@ endif ()
 
 SET(common_libs ${OPENSSL_LIBRARIES})
 if(NOT WIN32)
-   LIST (APPEND trotl)
+   LIST (APPEND common_libs trotl)
 endif ()
 
 add_definitions("-DTROTL_DLL")

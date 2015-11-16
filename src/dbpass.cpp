@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	static int verbose_flag = 0;
 	std::string password, dbid;
 	unsigned password_length;
-#if 1
+
 	while (1)
 	{
 		static struct option long_options[] = {
@@ -78,7 +78,6 @@ int main(int argc, char *argv[])
 	}
 	if (verbose_flag)
 		puts ("verbose flag is set");
-#endif
 
 	if (password.empty())
 	{

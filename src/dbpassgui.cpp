@@ -136,7 +136,7 @@ void DbPassGui::generatePressed()
 
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());
-	passwordEdit->setText(gen.c_str());	
+	passphraseEdit->setText(gen.c_str());	
 }
 
 void DbPassGui::createActions()
