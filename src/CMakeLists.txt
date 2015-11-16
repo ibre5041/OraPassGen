@@ -1,6 +1,6 @@
 SET(dbpassgui_ui_src dbpassguiui.ui)
 
-SET(common_sources common.cpp)
+SET(common_sources common.cpp crypto.cpp)
 if(WIN32)
    LIST (APPEND common_sources win32/getopt_long.cpp)
 include_directories(win32)

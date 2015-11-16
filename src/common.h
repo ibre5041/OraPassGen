@@ -17,4 +17,4 @@ typedef SSIZE_T ssize_t;
 #define MAXPW 32
 ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp);
 
-std::string genpasswd(std::string const& dbid, std::string const& passphrase);
+extern int verbose_flag;

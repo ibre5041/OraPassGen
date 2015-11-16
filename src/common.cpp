@@ -1,69 +1,8 @@
 #include "common.h"
-
-#include <openssl/bn.h>
-#include <openssl/md5.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-
 #include <string>
 #include <iostream>
 
-using namespace std;
-
-string genpasswd(string const& dbid, string const& passphrase)
-{
-	BN_CTX *ctx = BN_CTX_new();
-	int rc;
-
-	// use password hash has number a
-	unsigned char *md5 = MD5((unsigned char*)passphrase.c_str(), passphrase.size(), NULL);
-	BIGNUM *a = BN_bin2bn(md5, 16, NULL);
-	char *a_char = BN_bn2hex(a);
-	printf("m %s\n", a_char);
-
-	// use dbid as exponent p
-	BIGNUM *p = BN_new();
-	rc = BN_dec2bn(&p, dbid.c_str());
-	char *p_char = BN_bn2dec(p);
-	printf("p %s\n", p_char);
-
-	// read n from file
-	unsigned char *buffer;
-	long int buffer_len;
-	{
-		FILE* file = fopen("genn.bin", "r");
-		if (!file)
-		{
-			fprintf(stderr, "File not found: genn.bin");
-			return "";
-		}
-		fseek(file, 0L, SEEK_END);
-		buffer_len = ftell(file);
-		buffer = (unsigned char*)malloc(buffer_len);
-		fseek(file, 0L, SEEK_SET);
-		size_t read = fread(buffer, buffer_len, 1, file);
-		fclose(file);
-	}
-	BIGNUM *n = BN_new();
-	n = BN_bin2bn(buffer, buffer_len, n);
-	char *n_char = BN_bn2dec(n);
-	printf("n %s\n", n_char);
-
-	BIGNUM *r = BN_new();
-	rc = BN_mod_exp(r, a, p, n, ctx);
-	char *r_char = BN_bn2dec(r);
-	printf("r %s\n", r_char);
-
-	OPENSSL_free(a_char);
-	OPENSSL_free(p_char);
-	OPENSSL_free(n_char);
-	OPENSSL_free(r_char);
-	BN_CTX_free(ctx);
-	BN_free(r);
-	BN_free(a);
-	BN_free(n);
-	return r_char;
-}
+int verbose_flag = false;
 
 #ifdef _WIN32
 #include <windows.h>

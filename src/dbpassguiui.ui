@@ -129,30 +129,14 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
+     <item row="1" column="0">
       <widget class="QLineEdit" name="passwordEdit">
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
-       </property>
        <property name="maxLength">
         <number>32</number>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QCheckBox" name="showPasswordCheckbox">
-       <property name="toolTip">
-        <string>Show password</string>
-       </property>
-       <property name="toolTipDuration">
-        <number>5</number>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="2">
+     <item row="4" column="0" colspan="2">
       <widget class="QPushButton" name="generateButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
@@ -171,13 +155,50 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLineEdit" name="passphraseEdit"/>
+     <item row="3" column="0">
+      <widget class="QLineEdit" name="passphraseEdit">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+      </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QCheckBox" name="showPassphraseCheckbox">
+      <widget class="QCheckBox" name="showPasswordCheckbox">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Show password</string>
+       </property>
+       <property name="toolTipDuration">
+        <number>5</number>
+       </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="showPassphraseCheckbox">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="passphraseLabel">
+       <property name="text">
+        <string>Passphrase:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="generatedPasswordLabel">
+       <property name="text">
+        <string>Generated password:</string>
        </property>
       </widget>
      </item>

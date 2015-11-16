@@ -40,6 +40,9 @@ private:
 	QAction *restoreAction;
 	QAction *quitAction;
 
+	QIcon *icon;
 	QSystemTrayIcon *trayIcon;
 	QMenu *trayIconMenu;
+
+	QString n;
 };

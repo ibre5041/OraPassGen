@@ -15,6 +15,22 @@
 
 #include "common.h"
 
+static void usage()
+{
+	printf(
+		"                  \n"
+		"Usage:            \n"
+		"  --help          \n"
+		"  --base64        \n"
+		"  --binary        \n"
+		"  --decimal       \n"
+		"  --hexa          \n"
+		"  --file filename \n"
+		"  --verbose       \n"
+		"                  \n"
+		);
+}
+
 int main(int argc, char *argv[])
 {
 	int rc;
@@ -32,7 +48,6 @@ int main(int argc, char *argv[])
 	char *prime_p_char, *prime_q_char, *n_char;
 	
 	/* Flag set by "--verbose". */
-	static int verbose_flag = 0;
 	bool base64_flg, binary_flg, decimal_flg, hex_flg;
 	base64_flg = binary_flg = decimal_flg = hex_flg = false;
 	std::string filename;
@@ -44,10 +59,11 @@ int main(int argc, char *argv[])
 			{"verbose", no_argument,       &verbose_flag, 1},
 			/* These options don’t set a flag.
 			   We distinguish them by their indices. */
+			{"help",    no_argument,       0, 'h'},
 			{"base64",  no_argument,       0, '6'},
 			{"binary",  no_argument,       0, 'b'},
 			{"decimal", no_argument,       0, 'd'},
-			{"hex",     no_argument,       0, 'h'},
+			{"hexa",    no_argument,       0, 'x'},
 			{"file",    required_argument, 0, 'f'},
 			{0, 0, 0, 0}
 		};
@@ -70,6 +86,9 @@ int main(int argc, char *argv[])
 				printf (" with arg %s", optarg);
 			printf ("\n");
 			break;
+		case 'h':
+			usage();
+			break;
 		case '6':
 			puts ("option --base64\n");
 			base64_flg = true;
@@ -78,8 +97,8 @@ int main(int argc, char *argv[])
 			puts ("option -b\n");
 			binary_flg = true;
 			break;
-		case 'h':
-			puts ("option -h\n");
+		case 'x':
+			puts ("option -x\n");
 			hex_flg = true;
 			break;
 		case 'd':
@@ -97,6 +116,13 @@ int main(int argc, char *argv[])
 			abort ();
 		}
 	}
+
+	if (!(base64_flg | binary_flg | decimal_flg | hex_flg))
+	{
+		usage();
+		return 0;
+	}
+
 	if (verbose_flag)
 		puts ("verbose flag is set");
 

@@ -10,6 +10,7 @@
 #include <ostream>
 
 #include "common.h"
+#include "crypto.h"
 #include "dbutils.h"
 #include "dbpassgui.h"
 
@@ -44,9 +45,12 @@ int main(int argc, char *argv[])
 
 DbPassGui::DbPassGui(QWidget * parent)
 	: QDialog(parent)
+	, icon(new QIcon(":/resources/data-storage4.svg"))
 {
 	setupUi(this);
-	dbidEdit->setInputMask("99999999999999999999999999999999999999");
+
+	QRegExp number("[0-9]+");
+	dbidEdit->setValidator(new QRegExpValidator(number, dbidEdit));
 
 	QSettings s;
 	s.beginGroup("DbPassGui");
@@ -55,11 +59,16 @@ DbPassGui::DbPassGui(QWidget * parent)
 
 	createActions();
 	createTrayIcon();
+	
+	QFile nfile(":/resources/n.txt");
+	nfile.open(QIODevice::ReadOnly);
+	QTextStream in(&nfile);
+	n = in.readAll();
 
 	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 	connect(generateButton, SIGNAL(pressed()), this, SLOT(generatePressed()));
-	setWindowIcon(QIcon(":/images/data-storage4.svg"));
+	setWindowIcon(*icon);
 	setWindowTitle(tr("DbPass"));
 }
 
@@ -132,7 +141,7 @@ void DbPassGui::generatePressed()
 	QString pass = passwordEdit->text();
 	std::string utf8_dbid = dbid.toStdString();
 	std::string utf8_pass = pass.toStdString();
-	std::string gen = genpasswd(utf8_dbid, utf8_pass);
+	std::string gen = genpasswd(utf8_dbid, utf8_pass, n.toStdString());
 
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());
@@ -167,6 +176,6 @@ void DbPassGui::createTrayIcon()
 	trayIcon->setContextMenu(trayIconMenu);
 
 	trayIcon->setToolTip("DBA Pass");
-	trayIcon->setIcon(QIcon(":/images/data-storage4.svg"));
+	trayIcon->setIcon(*icon);
 	trayIcon->show();
 }

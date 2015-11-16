@@ -1,7 +1,9 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource prefix="/">
-<file>images/data-storage4.svg</file>
+<file>resources/data-storage4.svg</file>
+<file>resources/n.txt</file>
+<file>resources/databases.xml</file>
 </qresource>
 </RCC>
 	 

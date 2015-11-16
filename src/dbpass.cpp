@@ -19,15 +19,25 @@ using namespace trotl;
 #include <ostream>
 
 #include "common.h"
+#include "crypto.h"
 #include "dbutils.h"
-
 
 using namespace std;
 
+static void usage()
+{
+	printf(
+		"                                      \n"
+		"Usage:                                \n"
+		"  --dbid        <numeric database id> \n"
+		"  --passphrase  <passphrase>          \n"
+		"  --verbose                           \n"
+		"                                      \n"
+		);
+}
+
 int main(int argc, char *argv[])
 {
-	/* Flag set by "--verbose". */
-	static int verbose_flag = 0;
 	std::string password, dbid;
 	unsigned password_length;
 
@@ -40,11 +50,12 @@ int main(int argc, char *argv[])
 			   We distinguish them by their indices. */
 			{"dbid",     required_argument, 0, 'I'},
 			{"password", required_argument, 0, 'P'},
+			{ "help",    no_argument,       0, 'h' },
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "I:P:", long_options, &option_index);
+		int c = getopt_long (argc, argv, "hI:P:", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -69,6 +80,9 @@ int main(int argc, char *argv[])
 			printf ("option -P with value `%s'\n", optarg);
 			password = optarg;
 			break;
+		case 'h':
+			usage();
+			return 0;
 		case '?':
 			/* getopt_long already printed an error message. */
 			break;
@@ -115,5 +129,32 @@ int main(int argc, char *argv[])
 	}			
 #endif
 
-	std::string gen = genpasswd(dbid, password);
+	string n_str;
+	{
+		// read n from file
+		char *buffer;
+		long int buffer_len;
+		{
+			FILE* file = fopen("n.txt", "r");
+			if (!file)
+			{
+				fprintf(stderr, "File not found: genn.bin");
+			}
+			fseek(file, 0L, SEEK_END);
+			buffer_len = ftell(file);
+			buffer = (char*)malloc(buffer_len);
+			fseek(file, 0L, SEEK_SET);
+			size_t read = fread(buffer, buffer_len, 1, file);
+			fclose(file);
+		}
+		BIGNUM *n = BN_new();
+		int rc = BN_dec2bn(&n, buffer);
+		char *n_char = BN_bn2dec(n);
+		printf("n %s\n", n_char);
+		n_str = n_char;
+		free(buffer);
+		OPENSSL_free(n_char);
+		BN_free(n);
+	}
+	std::string gen = genpasswd(dbid, password, n_str);
 }
