@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
 		nchr = getpasswd (&p, MAXPW, '*', stdin);
 		if (verbose_flag)
 			printf("\n you entered   : %s  (%zu chars)\n", p, nchr);
+		printf("\n----------------------------\n");
 		password = pw;
 		password_length = nchr;
 	}
@@ -108,14 +109,20 @@ int main(int argc, char *argv[])
 		OciEnv _env(_envalloc);
 		OciLogin _login(_env);
 		OciConnection _con(_env, _login);
-		SqlStatement q0(_con, "select dbid from v$database");
-		std::string su;
+		SqlStatement q0(_con, "select dbid, name from v$database");
+		std::string name, sid;
 		while(!q0.eof())
 		{
-			q0 >> su;
-			std::cout << "dbid: " << su << std::endl;
+			q0 >> dbid >> name;
+			std::cout << " dbid: " << dbid << std::endl;
+			std::cout << " name: " << name << std::endl;
 		}
-		dbid = su;
+		SqlStatement q1(_con, "select instance_name from v$instance");
+		while(!q1.eof())
+		{
+			q1 >> sid;
+			std::cout << " sid:  " << sid << std::endl;
+		}
 	}
 	catch (OciException const& e)
 	{
