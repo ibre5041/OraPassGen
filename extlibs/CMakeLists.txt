@@ -1,6 +1,0 @@
-# trotl library
-IF (ORACLE_FOUND)
-  ADD_SUBDIRECTORY(trotl)
-ENDIF(ORACLE_FOUND)
-
-  

@@ -1,3 +1,4 @@
+add_subdirectory(trotl)
 
 IF(WIN32)
   IF (MSVC AND NOT BUILD_DEBUG)
@@ -19,13 +20,18 @@ endif ()
 
 SET(common_libs ${OPENSSL_LIBRARIES})
 if(NOT WIN32)
-   LIST (APPEND common_libs trotl)
+#  LIST (APPEND common_libs $<TARGET_OBJECTS:trotl>)
 endif ()
 
 add_definitions("-DTROTL_DLL")
 
-add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
-target_link_libraries(dbpass ${common_libs})
+IF(WIN32)
+   add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
+   target_link_libraries(dbpass ${common_libs})
+ELSE()
+   add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
+   target_link_libraries(dbpass ${common_libs} ${ORACLE_LIBRARIES})
+ENDIF()
 
 add_executable (genn genn.cpp ${common_sources})
 target_link_libraries(genn ${common_libs})
