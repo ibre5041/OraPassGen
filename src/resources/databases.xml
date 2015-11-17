@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<registry>
+  <host value="Server123">
+    <sid value="AAA">1234456</sid>
+    <sid value="BBB">1234456</sid>
+    <sid value="CCC">4564645</sid>
+    <sid value="ddd1">4564645</sid>
+  </host>
+  <host value="Server235">
+    <sid value="AAA">34563456</sid>
+    <sid value="BBB">34535653</sid>
+    <sid value="CCC">35356353</sid>
+    <sid value="DDD1">5435353</sid>
+  </host>
+  <host value="Server789">
+    <sid value="RAAA1">12344560</sid>
+    <sid value="RBBB1">12344560</sid>
+    <sid value="RCCC1">45646450</sid>
+    <sid value="RDDD1">45646450</sid>
+  </host>
+  <host value="Server788">
+    <sid value="RAAA2">12344560</sid>
+    <sid value="RBBB2">12344560</sid>
+    <sid value="RCCC2">45646450</sid>
+    <sid value="RDDD2">45646450</sid>
+  </host>
+</registry>

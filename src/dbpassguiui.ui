@@ -39,12 +39,18 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLineEdit" name="hostnameEdit">
+      <widget class="CompleteLineEdit" name="hostnameEdit">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Courier New</family>
+         <pointsize>10</pointsize>
+        </font>
        </property>
        <property name="maxLength">
         <number>32</number>
@@ -68,12 +74,18 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLineEdit" name="sidDEdit">
+      <widget class="CompleteLineEdit" name="sidEdit">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
          <height>30</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Courier New</family>
+         <pointsize>10</pointsize>
+        </font>
        </property>
        <property name="maxLength">
         <number>9</number>
@@ -104,6 +116,12 @@
          <height>30</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <family>Courier New</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="maxLength">
         <number>38</number>
        </property>
@@ -129,14 +147,7 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="1" column="0">
-      <widget class="QLineEdit" name="passwordEdit">
-       <property name="maxLength">
-        <number>32</number>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0" colspan="2">
+     <item row="5" column="0" colspan="2">
       <widget class="QPushButton" name="generateButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
@@ -155,15 +166,63 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLineEdit" name="passphraseEdit">
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
+     <item row="0" column="0">
+      <widget class="QLabel" name="passphraseLabel">
+       <property name="text">
+        <string>Passphrase:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="showPasswordCheckbox">
+     <item row="3" column="0">
+      <widget class="QLabel" name="generatedPasswordLabel">
+       <property name="text">
+        <string>Generated password:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLineEdit" name="passphraseEdit">
+       <property name="font">
+        <font>
+         <family>Courier New</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLineEdit" name="generatedPasswordEdit">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <family>Courier New</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QCheckBox" name="showGeneratedPasswordCheckbox">
        <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
        </property>
@@ -178,7 +237,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="1" column="1">
       <widget class="QCheckBox" name="showPassphraseCheckbox">
        <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
@@ -188,24 +247,17 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="passphraseLabel">
-       <property name="text">
-        <string>Passphrase:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="generatedPasswordLabel">
-       <property name="text">
-        <string>Generated password:</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CompleteLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>completelineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

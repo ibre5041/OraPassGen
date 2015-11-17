@@ -14,8 +14,11 @@
 #include "dbutils.h"
 #include "dbpassgui.h"
 
+#include "completelineedit.h"
+
 #include <QtGui>
 #include <QtWidgets>
+#include <QDomDocument>
 
 using namespace std;
 
@@ -52,10 +55,23 @@ DbPassGui::DbPassGui(QWidget * parent)
 	QRegExp number("[0-9]+");
 	dbidEdit->setValidator(new QRegExpValidator(number, dbidEdit));
 
-	QSettings s;
-	s.beginGroup("DbPassGui");
-	restoreGeometry(s.value("geometry", QByteArray()).toByteArray());
-	s.endGroup();
+	QFont font(generatedPasswordEdit->font());
+	QString char16("12345678901234567890123456789012");
+	QFontMetrics fm(font);
+	int width = fm.width(char16);
+	passphraseEdit->setMinimumWidth(width+10);
+	generatedPasswordEdit->setMinimumWidth(width+10);
+	generatedPasswordEdit->setStyleSheet("QLineEdit[readOnly=\"true\"] {"
+		"color: #808080;"
+		"background-color: #F0F0F0;"
+		"border: 1px solid #B0B0B0;"
+		"border-radius: 2px;}");
+
+	settings.beginGroup("DbPassGui");
+	restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+	showPassphraseCheckbox->setCheckState(settings.value("CheckBoxAState").toBool() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+	showGeneratedPasswordCheckbox->setCheckState(settings.value("CheckBoxBState").toBool() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+	settings.endGroup();
 
 	createActions();
 	createTrayIcon();
@@ -65,11 +81,62 @@ DbPassGui::DbPassGui(QWidget * parent)
 	QTextStream in(&nfile);
 	n = in.readAll();
 
+	QFile xmlfile(":/resources/databases.xml");
+	xmlfile.open(QIODevice::ReadOnly);
+	QDomDocument doc;
+	doc.setContent(&xmlfile);
+	QDomElement docElem = doc.documentElement();
+	QDomNode node = docElem.firstChild();
+	while (!node.isNull())
+	{
+		QString hostname = node.toElement().attribute("value");
+		printf("%s\n", hostname.toStdString().c_str());
+		QDomNode child = node.firstChild();
+		while (!child.isNull())
+		{
+			QString sid = child.toElement().attribute("value");
+			QString dbid = child.toElement().text();
+			printf(" %s\t%s\n", sid.toStdString().c_str(), dbid.toStdString().c_str());
+			
+			if (hostSidToDbid.contains(hostname))
+			{
+				hostSidToDbid[hostname][sid] = dbid;
+			} else {
+				hostSidToDbid.insert(hostname, QMap<QString, QString>());
+				hostSidToDbid[hostname][sid] = dbid;
+			}
+
+			if (sidHostToDbid.contains(sid))
+			{
+				sidHostToDbid[sid][hostname] = dbid;
+			}
+			else {
+				sidHostToDbid.insert(sid, QMap<QString, QString>());
+				sidHostToDbid[sid][hostname] = dbid;
+			}
+			child = child.nextSibling();
+		}
+		//do something
+		node = node.nextSibling();
+	}
+	hostnameEdit->setWords(hostSidToDbid.keys());
+	sidEdit->setWords(sidHostToDbid.keys());
+
+	dbidEdit->installEventFilter(this);
+
 	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 	connect(generateButton, SIGNAL(pressed()), this, SLOT(generatePressed()));
 	setWindowIcon(*icon);
 	setWindowTitle(tr("DbPass"));
+
+#if 0
+	setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+	setParent(0); // Create TopLevel-Widget
+	setAttribute(Qt::WA_NoSystemBackground, true);
+	setAttribute(Qt::WA_TranslucentBackground, true);
+	setAttribute(Qt::WA_PaintOnScreen);
+#endif
 }
 
 void DbPassGui::setVisible(bool visible)
@@ -80,21 +147,34 @@ void DbPassGui::setVisible(bool visible)
 	QDialog::setVisible(visible);
 }
 
+bool DbPassGui::eventFilter(QObject *obj, QEvent *event)
+{
+	if (obj == dbidEdit)
+	{
+		if (event->type() == QEvent::FocusIn)
+		{
+			QString dbid = hostSidToDbid.value(hostnameEdit->text()).value(sidEdit->text());
+			if (!dbid.isEmpty())
+				dbidEdit->setText(dbid);
+		}
+	}
+	// pass the event on to the parent class
+	return QDialog::eventFilter(obj, event);
+}
+
 void DbPassGui::showNormal()
 {
-	QSettings s;
-	s.beginGroup("DbPassGui");
-	restoreGeometry(s.value("geometry", QByteArray()).toByteArray());
-	s.endGroup();
+	settings.beginGroup("DbPassGui");
+	restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+	settings.endGroup();
 	QDialog::showNormal();
 }
 
 void DbPassGui::hide()
-{
-	QSettings s;
-	s.beginGroup("DbPassGui");
-	s.setValue("geometry", saveGeometry());
-	s.endGroup();
+{	
+	settings.beginGroup("DbPassGui");
+	settings.setValue("geometry", saveGeometry());
+	settings.endGroup();
 	QDialog::hide();
 }
 
@@ -138,14 +218,15 @@ void DbPassGui::iconActivated(QSystemTrayIcon::ActivationReason reason)
 void DbPassGui::generatePressed()
 {
 	QString dbid = dbidEdit->text();
-	QString pass = passwordEdit->text();
+	QString pass = passphraseEdit->text();
 	std::string utf8_dbid = dbid.toStdString();
 	std::string utf8_pass = pass.toStdString();
-	std::string gen = genpasswd(utf8_dbid, utf8_pass, n.toStdString());
+	std::string utf8_n    = n.toStdString();
+	std::string gen = genpasswd(utf8_dbid, utf8_pass, utf8_n);
 
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());
-	passphraseEdit->setText(gen.c_str());	
+	generatedPasswordEdit->setText(gen.c_str());
 }
 
 void DbPassGui::createActions()
@@ -161,6 +242,18 @@ void DbPassGui::createActions()
 
 	quitAction = new QAction(tr("&Quit"), this);
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+	connect(showPassphraseCheckbox, SIGNAL(stateChanged(int)), this, SLOT(flipCheckBoxA(int)));
+	connect(showGeneratedPasswordCheckbox, SIGNAL(stateChanged(int)), this, SLOT(flipCheckBoxB(int)));
+
+	connect(hostnameEdit, SIGNAL(returnPressed()), this, SLOT(hostnameEntered()));
+	connect(sidEdit, SIGNAL(returnPressed()), this, SLOT(sidEntered()));
+
+	connect(hostnameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(hostnameCleared(const QString&)));
+	connect(sidEdit, SIGNAL(textChanged(const QString&)), this, SLOT(sidCleared(const QString&)));
+
+	flipCheckBoxA(showPassphraseCheckbox->checkState());
+	flipCheckBoxB(showGeneratedPasswordCheckbox->checkState());
 }
 
 void DbPassGui::createTrayIcon()
@@ -178,4 +271,96 @@ void DbPassGui::createTrayIcon()
 	trayIcon->setToolTip("DBA Pass");
 	trayIcon->setIcon(*icon);
 	trayIcon->show();
+}
+
+void DbPassGui::flipCheckBoxA(int state)
+{
+	if (state == Qt::CheckState::Checked)
+		passphraseEdit->setEchoMode(QLineEdit::Normal);
+	else
+		passphraseEdit->setEchoMode(QLineEdit::Password);
+
+	settings.beginGroup("DbPassGui");
+	settings.setValue("CheckBoxAState", state == Qt::CheckState::Checked);
+	settings.endGroup();
+}
+
+void DbPassGui::flipCheckBoxB(int state)
+{
+	if (state == Qt::CheckState::Checked)
+		generatedPasswordEdit->setEchoMode(QLineEdit::Normal);
+	else
+		generatedPasswordEdit->setEchoMode(QLineEdit::Password);
+
+	settings.beginGroup("DbPassGui");
+	settings.setValue("CheckBoxBState", state == Qt::CheckState::Checked);
+	settings.endGroup();
+}
+
+void DbPassGui::hostnameEntered()
+{
+	QString hostname = hostnameEdit->text();
+	QStringList sids = hostSidToDbid.value(hostname).keys();
+	if (sids.size() == 1)
+	{
+		QString sid = sids.at(0);
+		sidEdit->setWords(QStringList());
+		sidEdit->setText(sid);
+		setDbid(hostSidToDbid.value(hostname).value(sid));
+	} else {
+		sidEdit->setWords(sids);
+		focusNextChild();
+	}
+}
+
+void DbPassGui::sidEntered()
+{
+	QString sid = sidEdit->text();
+	QStringList hostnames = sidHostToDbid.value(sid).keys();
+	if (hostnames.size() == 1 && hostnameEdit->text().isEmpty())
+	{
+		QString hostname = hostnames.at(0);
+		hostnameEdit->setWords(QStringList());
+		hostnameEdit->setText(hostname);
+		setDbid(sidHostToDbid.value(sid).value(hostname));
+	}
+	else {
+		hostnameEdit->setWords(hostnames);
+	}
+
+	if (hostnameEdit->text().isEmpty()) {
+		focusPreviousChild();
+	} else {
+		passphraseEdit->setFocus();
+		setDbid(sidHostToDbid.value(sid).value(hostnameEdit->text()));
+	}
+}
+
+void DbPassGui::clearAll()
+{
+	hostnameEdit->clear();
+	sidEdit->clear();
+	dbidEdit->clear();
+	passphraseEdit->clear();
+	generatedPasswordEdit->clear();
+}
+
+void DbPassGui::hostnameCleared(const QString &hostname)
+{
+	if (!hostname.isEmpty())
+		return;
+	sidEdit->setWords(sidHostToDbid.keys());
+}
+
+void DbPassGui::sidCleared(const QString &sid)
+{
+	if (!sid.isEmpty())
+		return;
+	hostnameEdit->setWords(hostSidToDbid.keys());
+}
+
+void DbPassGui::setDbid(QString const& dbid)
+{
+	dbidEdit->setText(dbid);
+	QTimer::singleShot(30000, this, SLOT(clearAll()));
 }

@@ -1,3 +1,14 @@
+
+IF(WIN32)
+  IF (MSVC AND NOT BUILD_DEBUG)
+    # this is a must to switch off subsystem:console (console window poping up)
+    # WinMain wrapper from QT_QTMAIN_LIBRARY is used and liner must be modified
+    #LINK_LIBRARIES(${QT_QTMAIN_LIBRARY})
+    #SET (GUI_TYPE WIN32)
+  ENDIF ()
+ENDIF(WIN32)
+		    
+
 SET(dbpassgui_ui_src dbpassguiui.ui)
 
 SET(common_sources common.cpp crypto.cpp)
@@ -19,14 +30,15 @@ target_link_libraries(dbpass ${common_libs})
 add_executable (genn genn.cpp ${common_sources})
 target_link_libraries(genn ${common_libs})
 
-set(dbpassgui_moc_classes dbpassgui.h)
+set(dbpassgui_moc_classes dbpassgui.h completelineedit.h)
 qt5_wrap_ui(dbpassgui_ui_sources ${dbpassgui_ui_src})
 qt5_wrap_cpp(dbpassgui_moc_sources ${dbpassgui_moc_classes})
 qt5_add_resources(dbpassgui_rcc_srcs systray.qrc)
 
-add_executable (dbpassgui
+add_executable (dbpassgui ${GUI_TYPE}
   dbpassgui.cpp
   dbutils.cpp
+  completelineedit.cpp
   ${common_sources}
   ${dbpassgui_ui_sources}  
   ${dbpassgui_moc_sources}
@@ -37,4 +49,6 @@ target_link_libraries(dbpassgui
   ${Qt5Core_LIBRARIES}          # dynamic qt5
   ${Qt5Gui_LIBRARIES}           # dynamic qt5
   ${Qt5Widgets_LIBRARIES}       # dynamic qt5
+  ${Qt5Xml_LIBRARIES}           # dynamic qt5
+  #Qt5::WinMain
   )

@@ -67,17 +67,11 @@ int main(int argc, char *argv[])
 			/* If this option set a flag, do nothing else now. */
 			if (long_options[option_index].flag != 0)
 				break;
-			printf ("option %s", long_options[option_index].name);
-			if (optarg)
-				printf (" with arg %s", optarg);
-			printf ("\n");
 			break;
 		case 'I':
-			printf ("option -I with value `%s'\n", optarg);
 			dbid = optarg;
 			break;
 		case 'P':
-			printf ("option -P with value `%s'\n", optarg);
 			password = optarg;
 			break;
 		case 'h':
@@ -100,7 +94,8 @@ int main(int argc, char *argv[])
 		ssize_t nchr = 0;
 		printf ( "\n Enter password: ");
 		nchr = getpasswd (&p, MAXPW, '*', stdin);
-		printf ("\n you entered   : %s  (%zu chars)\n", p, nchr);
+		if (verbose_flag)
+			printf("\n you entered   : %s  (%zu chars)\n", p, nchr);
 		password = pw;
 		password_length = nchr;
 	}
@@ -150,11 +145,15 @@ int main(int argc, char *argv[])
 		BIGNUM *n = BN_new();
 		int rc = BN_dec2bn(&n, buffer);
 		char *n_char = BN_bn2dec(n);
-		printf("n %s\n", n_char);
+		if (verbose_flag)
+			printf("n %s\n", n_char);
 		n_str = n_char;
 		free(buffer);
 		OPENSSL_free(n_char);
 		BN_free(n);
 	}
 	std::string gen = genpasswd(dbid, password, n_str);
+
+	printf("\n\n");
+	printf("alter user sys identified by \"%s\";\n", gen.c_str());
 }
