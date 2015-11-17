@@ -11,6 +11,7 @@ typedef SSIZE_T ssize_t;
 #define DBPASS_BITS 4096
 #define DBPASS_BYTES (DBPASS_BITS / 8)
 
+#define N_FILE_DEC "n.txt"
 #define N_FILE_BIN "n.bin"
 #define N_FILE_HEX "n.hex"
 

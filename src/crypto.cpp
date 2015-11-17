@@ -57,6 +57,7 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 
 	retval = mdString;
 
+	free(r_bin);
 	OPENSSL_free(a_char);
 	OPENSSL_free(p_char);
 	OPENSSL_free(n_char);

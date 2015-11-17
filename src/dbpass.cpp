@@ -135,10 +135,10 @@ int main(int argc, char *argv[])
 		char *buffer;
 		long int buffer_len;
 		{
-			FILE* file = fopen("n.txt", "r");
+			FILE* file = fopen(N_FILE_DEC, "r");
 			if (!file)
 			{
-				fprintf(stderr, "File not found: genn.bin");
+				fprintf(stderr, "File not found: " N_FILE_DEC "\n");
 			}
 			fseek(file, 0L, SEEK_END);
 			buffer_len = ftell(file);
