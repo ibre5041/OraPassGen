@@ -130,6 +130,7 @@ DbPassGui::DbPassGui(QWidget * parent)
 	setWindowIcon(*icon);
 	setWindowTitle(tr("DbPass"));
 
+	setWindowFlags(Qt::WindowStaysOnTopHint);
 #if 0
 	setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
 	setParent(0); // Create TopLevel-Widget
