@@ -1,12 +1,14 @@
-add_subdirectory(trotl)
+
 
 IF(WIN32)
   IF (MSVC AND NOT BUILD_DEBUG)
     # this is a must to switch off subsystem:console (console window poping up)
     # WinMain wrapper from QT_QTMAIN_LIBRARY is used and liner must be modified
     #LINK_LIBRARIES(${QT_QTMAIN_LIBRARY})
-    #SET (GUI_TYPE WIN32)
+    SET (GUI_TYPE WIN32)
   ENDIF ()
+ELSE ()
+  add_subdirectory(trotl)
 ENDIF(WIN32)
 		    
 
@@ -56,5 +58,5 @@ target_link_libraries(dbpassgui
   ${Qt5Gui_LIBRARIES}           # dynamic qt5
   ${Qt5Widgets_LIBRARIES}       # dynamic qt5
   ${Qt5Xml_LIBRARIES}           # dynamic qt5
-  #Qt5::WinMain
+  Qt5::WinMain
   )

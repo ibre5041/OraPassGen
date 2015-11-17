@@ -69,6 +69,11 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 		{
 			r2_char[1] = 'a' + (r2_char[1] - 'A');
 		}
+		// 3rd character of password must be digit
+		if (!isdigit(r2_char[2]))
+		{
+			r2_char[2] = '0';
+		}
 	}
 
 	if (verbose_flag)

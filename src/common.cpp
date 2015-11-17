@@ -53,7 +53,8 @@ ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp)
 		}
 		// Restore the console mode
 		SetConsoleMode(hStdin, mode);
-		std::cout << "Console mode restored" << std::endl;
+		if (verbose_flag)
+			std::cout << std::endl << "Console mode restored" << std::endl;
 	} else {
 		// Cygwin path
 		char c = 0;
