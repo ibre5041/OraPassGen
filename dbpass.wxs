@@ -15,9 +15,9 @@
   <?define PlatformSystemFolder = "SystemFolder" ?>
   <?endif ?>
   <?ifdef env.BUILD_NUMBER?>
-  <?define ProductVersion="0.2.$(env.BUILD_NUMBER)"?>
+  <?define ProductVersion="0.3.$(env.BUILD_NUMBER)"?>
   <?else?>
-  <?define ProductVersion="0.2.0"?>
+  <?define ProductVersion="0.3.0"?>
   <?endif?>
   <?define UpgradeCode="AAAA2F25-E626-4CC5-BC37-86477A2609AC"?>
   <?define BuildType = "RelWithDebInfo" ?>
