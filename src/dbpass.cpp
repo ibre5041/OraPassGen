@@ -73,6 +73,13 @@ int main(int argc, char *argv[])
 			break;
 		case 'P':
 			password = optarg;
+			{ // hide password from commandline
+				size_t idx = 0;
+				while(optarg[idx])
+				{
+					optarg[idx++] = '*';
+				}
+			}
 			break;
 		case 'h':
 			usage();
