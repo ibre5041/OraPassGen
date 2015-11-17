@@ -1,4 +1,4 @@
-echo on
+@echo off
 SET BUILD_ARCH=x64
 
 SET DIR1=c:\Program Files (x86)\WiX Toolset v3.9\bin
@@ -25,3 +25,17 @@ light.exe -ext WixUIExtension -o dbpass.64bit.msi dbpass.wixobj
 
 @pause
 
+REM
+REM C:\DEVEL\dbpass>signtool sign /v /f "OSD Ivan Brezina.p12" /P pass ^
+REM /d "Password tool for Oracle" ^
+REM /du "https://github.com/ibre5041/dbpass" ^
+REM /t http://timestamp.verisign.com/scripts/timstamp.dll ^
+REM src\RelWithDebInfo\*.exe src\RelWithDebInfo\*.dll dbpass.64bit.msi
+REM
+
+REM
+REM C:\DEVEL\dbpass>signtool sign /v /f "OSD Ivan Brezina.p12" /P pass ^
+REM /d "Password tool for Oracle" ^
+REM /du "https://github.com/ibre5041/dbpass" ^
+REM /t http://timestamp.verisign.com/scripts/timstamp.dll dbpass.64bit.msi
+REM
