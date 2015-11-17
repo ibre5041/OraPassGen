@@ -96,15 +96,26 @@ int main(int argc, char *argv[])
 
 	if (password.empty())
 	{
-		char pw[MAXPW] = {0};
-		char *p = pw;
+		char pw1[MAXPW] = {0}, pw2[MAXPW] = {0};
+		char *p1 = pw1, *p2 = pw2;
 		ssize_t nchr = 0;
-		printf ( "\n Enter password: ");
-		nchr = getpasswd (&p, MAXPW, '*', stdin);
-		if (verbose_flag)
-			printf("\n you entered   : %s  (%zu chars)\n", p, nchr);
+		std::string password2;
+		printf ( "\n Enter password:  ");
+		nchr = getpasswd (&p1, MAXPW, '*', stdin);
+		printf ( "\n Retype password: ");
+		nchr = getpasswd (&p2, MAXPW, '*', stdin);
 		printf("\n----------------------------\n");
-		password = pw;
+		if (verbose_flag) {
+			printf("\n you entered   : %s  (%zu chars)\n", p1, nchr);
+			printf("\n you entered   : %s  (%zu chars)\n", p2, nchr);
+		}
+		password = pw1;
+		password2 = pw2;
+		if (password != password2)
+		{
+			printf("passwords do not match\n");
+			return 2;
+		}		
 		password_length = nchr;
 	}
 
@@ -134,7 +145,7 @@ int main(int argc, char *argv[])
 	catch (OciException const& e)
 	{
 		std::cerr << e.what();
-		return -1;
+		return 1;
 	}			
 #endif
 
