@@ -20,6 +20,11 @@
 #include <QtWidgets>
 #include <QDomDocument>
 
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+Q_IMPORT_PLUGIN(QSvgIconPlugin)
+Q_IMPORT_PLUGIN(QSvgPlugin)
+
 using namespace std;
 
 int main(int argc, char *argv[])
