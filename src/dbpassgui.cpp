@@ -17,14 +17,17 @@
 #include "completelineedit.h"
 
 #include <Qt>
+#include <QtGlobal>
 #include <QtGui>
 #include <QtWidgets>
 #include <QDomDocument>
 
+#ifdef Q_OS_WIN32
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 Q_IMPORT_PLUGIN(QSvgIconPlugin)
 Q_IMPORT_PLUGIN(QSvgPlugin)
+#endif
 
 using namespace std;
 
@@ -75,8 +78,8 @@ DbPassGui::DbPassGui(QWidget * parent)
 
 	settings.beginGroup("DbPassGui");
 	restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
-	showPassphraseCheckbox->setCheckState(settings.value("CheckBoxAState").toBool() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-	showGeneratedPasswordCheckbox->setCheckState(settings.value("CheckBoxBState").toBool() ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+	showPassphraseCheckbox->setCheckState(settings.value("CheckBoxAState").toBool() ? Qt::Checked : Qt::Unchecked);
+	showGeneratedPasswordCheckbox->setCheckState(settings.value("CheckBoxBState").toBool() ? Qt::Checked : Qt::Unchecked);
 	settings.endGroup();
 
 	createActions();
@@ -282,25 +285,25 @@ void DbPassGui::createTrayIcon()
 
 void DbPassGui::flipCheckBoxA(int state)
 {
-	if (state == Qt::CheckState::Checked)
+	if (state == Qt::Checked)
 		passphraseEdit->setEchoMode(QLineEdit::Normal);
 	else
 		passphraseEdit->setEchoMode(QLineEdit::Password);
 
 	settings.beginGroup("DbPassGui");
-	settings.setValue("CheckBoxAState", state == Qt::CheckState::Checked);
+	settings.setValue("CheckBoxAState", state == Qt::Checked);
 	settings.endGroup();
 }
 
 void DbPassGui::flipCheckBoxB(int state)
 {
-	if (state == Qt::CheckState::Checked)
+	if (state == Qt::Checked)
 		generatedPasswordEdit->setEchoMode(QLineEdit::Normal);
 	else
 		generatedPasswordEdit->setEchoMode(QLineEdit::Password);
 
 	settings.beginGroup("DbPassGui");
-	settings.setValue("CheckBoxBState", state == Qt::CheckState::Checked);
+	settings.setValue("CheckBoxBState", state == Qt::Checked);
 	settings.endGroup();
 }
 
