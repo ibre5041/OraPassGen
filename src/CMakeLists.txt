@@ -1,5 +1,4 @@
 
-
 IF(WIN32)
   IF (MSVC AND NOT BUILD_DEBUG)
     # this is a must to switch off subsystem:console (console window poping up)
@@ -10,7 +9,6 @@ IF(WIN32)
 ELSE ()
   add_subdirectory(trotl)
 ENDIF(WIN32)
-		    
 
 SET(dbpassgui_ui_src dbpassguiui.ui)
 
@@ -30,13 +28,23 @@ add_definitions("-DTROTL_DLL")
 IF(WIN32)
    add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
    target_link_libraries(dbpass ${common_libs})
+ELSEIF(BUILD_STATIC)
+   # path to libstdc++.a (parameter "-static-libg++" not understood)
+   execute_process(COMMAND "g++" "-print-file-name=libstdc++.a" OUTPUT_VARIABLE LIB_CPP_STATIC_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+   execute_process(COMMAND "ln" "-sf" "${LIB_CPP_STATIC_PATH}" "${CMAKE_CURRENT_BINARY_DIR}")
+   get_filename_component(LIB_CPP_STATIC ${LIB_CPP_STATIC_PATH} NAME)
+   add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
+   target_link_libraries(dbpass "-static-libgcc" -L. ${LIB_CPP_STATIC} ${common_libs} ${ORACLE_LIBRARY_CLNTST} "-Wl,--whole-archive" trotl "-Wl,--no-whole-archive")
 ELSE()
-   add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
-   target_link_libraries(dbpass ${common_libs} ${ORACLE_LIBRARIES})
+   #cmake 3.0 (not present on RHEL) add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
+   add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
+   target_link_libraries(dbpass ${ORACLE_LIBRARIES} trotl)
 ENDIF()
 
 add_executable (genn genn.cpp ${common_sources})
 target_link_libraries(genn ${common_libs})
+
+IF(BUILD_QT_GUI)
 
 set(dbpassgui_moc_classes dbpassgui.h completelineedit.h)
 qt5_wrap_ui(dbpassgui_ui_sources ${dbpassgui_ui_src})
@@ -60,3 +68,4 @@ target_link_libraries(dbpassgui
   ${Qt5Xml_LIBRARIES}           # dynamic qt5
   Qt5::WinMain
   )
+ENDIF()
