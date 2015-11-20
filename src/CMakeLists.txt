@@ -18,10 +18,7 @@ if(WIN32)
 include_directories(win32)
 endif ()
 
-SET(common_libs ${OPENSSL_LIBRARIES})
-if(NOT WIN32)
-#  LIST (APPEND common_libs $<TARGET_OBJECTS:trotl>)
-endif ()
+set(common_libs ${OPENSSL_LIBRARIES})
 
 add_definitions("-DTROTL_DLL")
 
@@ -29,15 +26,27 @@ IF(WIN32)
    add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
    target_link_libraries(dbpass ${common_libs})
 ELSEIF(BUILD_STATIC)
-   # path to libstdc++.a (parameter "-static-libg++" not understood)
+   # generate n.o
+   # objcopy --input binary --output elf64-x86-64 --binary-architecture i386 resources/n.txt n.oa
+   add_custom_command(OUTPUT n.o COMMAND "objcopy" "--input" "binary" "--output" "elf64-x86-64" "--binary-architecture" "i386" "resources/n.txt" "n.o")
+
+   # libstdc++.a must be present in local directory when linkinh statically
+   # path to libstdc++.a (parameter "-static-libg++" not yet understood on RHEL6)
    execute_process(COMMAND "g++" "-print-file-name=libstdc++.a" OUTPUT_VARIABLE LIB_CPP_STATIC_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
    execute_process(COMMAND "ln" "-sf" "${LIB_CPP_STATIC_PATH}" "${CMAKE_CURRENT_BINARY_DIR}")
    get_filename_component(LIB_CPP_STATIC ${LIB_CPP_STATIC_PATH} NAME)
-   # objcopy --input binary --output elf64-x86-64 --binary-architecture i386 resources/n.txt n.o
+
    add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} n.o)
-   target_link_libraries(dbpass "-static-libgcc" -L. ${LIB_CPP_STATIC} ${common_libs} ${ORACLE_LIBRARY_CLNTST} "-Wl,--whole-archive" trotl "-Wl,--no-whole-archive")
+   target_link_libraries(dbpass "-static-libgcc"
+     -L. ${LIB_CPP_STATIC}
+     ${common_libs}
+     ${ORACLE_STATIC_LIBRARIES}
+     "-Wl,--whole-archive" trotl "-Wl,--no-whole-archive"
+     pthread dl)
 ELSE()
-   #cmake 3.0 (not present on RHEL) add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
+   # cmake 3.0 (not present on RHEL)
+   # library type OBJECTS is not yet understood
+   # add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
    add_executable (dbpass dbpass.cpp dbutils.cpp ${common_sources})
    target_link_libraries(dbpass ${ORACLE_LIBRARIES} trotl)
 ENDIF()
@@ -48,6 +57,7 @@ target_link_libraries(genn ${common_libs})
 IF(BUILD_QT_GUI)
 IF (WIN32 AND MSVC)
   LIST(APPEND common_sources win32/dbpass.rc)
+  LIST(dbpassguiui_libs Qt5::WinMain)
 ENDIF (WIN32 AND MSVC)
 
 set(dbpassgui_moc_classes dbpassgui.h completelineedit.h)
@@ -70,6 +80,6 @@ target_link_libraries(dbpassgui
   ${Qt5Gui_LIBRARIES}           # dynamic qt5
   ${Qt5Widgets_LIBRARIES}       # dynamic qt5
   ${Qt5Xml_LIBRARIES}           # dynamic qt5
-  Qt5::WinMain
+  ${dbpassguiui_libs}
   )
 ENDIF()
