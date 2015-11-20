@@ -54,5 +54,5 @@ private:
 
 	QSettings settings;
 	QString n;
-	QMap<QString, QMap<QString, QString>> hostSidToDbid, sidHostToDbid;
+	QMap<QString, QMap<QString, QString> > hostSidToDbid, sidHostToDbid;
 };

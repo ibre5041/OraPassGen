@@ -16,6 +16,7 @@
 
 #include "completelineedit.h"
 
+#include <Qt>
 #include <QtGui>
 #include <QtWidgets>
 #include <QDomDocument>
