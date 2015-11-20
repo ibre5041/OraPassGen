@@ -9,6 +9,7 @@
 
 #ifndef _WIN32
 #include <getopt.h>
+#include <dlfcn.h>
 #include "trotl.h"
 using namespace trotl;
 #else
@@ -36,10 +37,16 @@ static void usage()
 		);
 }
 
+extern "C" {
+	extern char _binary_resources_n_txt_start;
+	extern char _binary_resources_n_txt_size;
+	extern char _binary_resources_n_txt_end;
+}
+
 int main(int argc, char *argv[])
 {
-	std::string password, dbid;
-	unsigned password_length;
+	std::string passphrase, dbid;
+	unsigned passphrase_length;
 
 	while (1)
 	{
@@ -48,9 +55,9 @@ int main(int argc, char *argv[])
 			{"verbose", no_argument,       &verbose_flag, 1},
 			/* These options don’t set a flag.
 			   We distinguish them by their indices. */
-			{"dbid",     required_argument, 0, 'I'},
-			{"password", required_argument, 0, 'P'},
-			{ "help",    no_argument,       0, 'h' },
+			{"dbid",       required_argument, 0, 'I'},
+			{"passphrase", required_argument, 0, 'P'},
+			{ "help",      no_argument,       0, 'h' },
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -72,8 +79,8 @@ int main(int argc, char *argv[])
 			dbid = optarg;
 			break;
 		case 'P':
-			password = optarg;
-			{ // hide password from commandline
+			passphrase = optarg;
+			{ // hide passphrase from commandline
 				size_t idx = 0;
 				while(optarg[idx])
 				{
@@ -94,29 +101,29 @@ int main(int argc, char *argv[])
 	if (verbose_flag)
 		puts ("verbose flag is set");
 
-	if (password.empty())
+	if (passphrase.empty())
 	{
 		char pw1[MAXPW] = {0}, pw2[MAXPW] = {0};
 		char *p1 = pw1, *p2 = pw2;
 		ssize_t nchr = 0;
-		std::string password2;
-		printf ( "\n Enter password:  ");
+		std::string passphrase2;
+		printf ( "\n Enter passphrase:  ");
 		nchr = getpasswd (&p1, MAXPW, '*', stdin);
-		printf ( "\n Retype password: ");
+		printf ( "\n Retype passphrase: ");
 		nchr = getpasswd (&p2, MAXPW, '*', stdin);
 		printf("\n----------------------------\n");
 		if (verbose_flag) {
 			printf("\n you entered   : %s  (%zu chars)\n", p1, nchr);
 			printf("\n you entered   : %s  (%zu chars)\n", p2, nchr);
 		}
-		password = pw1;
-		password2 = pw2;
-		if (password != password2)
+		passphrase = pw1;
+		passphrase2 = pw2;
+		if (passphrase != passphrase2)
 		{
-			printf("passwords do not match\n");
+			printf("passphrases do not match\n");
 			return 2;
 		}		
-		password_length = nchr;
+		passphrase_length = nchr;
 	}
 
 #ifndef _WIN32
@@ -149,9 +156,22 @@ int main(int argc, char *argv[])
 	}			
 #endif
 
+#ifdef __linux__
+	
 	string n_str;
-	{
-		// read n from file
+	void* elf_handle = dlopen(0,RTLD_NOW|RTLD_GLOBAL); // dlopen self
+	// - generate factor file:           genn --decimal -f n.txt
+	// - compile n.txt into .elf format: objcopy --input binary --output elf64-x86-64 --binary-architecture i386 resources/n.txt n.o
+	// - append n.o src/CMakeLists.txt common_sources variable
+	size_t n_len = (size_t) dlsym(elf_handle, "_binary_resources_n_txt_size");
+	char *n_data = (char *) dlsym(elf_handle, "_binary_resources_n_txt_start");
+	if (n_len)
+	{ // 1st check whether n was compiled into this binary		
+		n_str = std::string(n_data, n_len);
+	}
+#endif
+	if (n_str.empty())
+	{ // 2n read n from file		
 		char *buffer;
 		long int buffer_len;
 		{
@@ -159,6 +179,7 @@ int main(int argc, char *argv[])
 			if (!file)
 			{
 				fprintf(stderr, "File not found: " N_FILE_DEC "\n");
+				return 3;
 			}
 			fseek(file, 0L, SEEK_END);
 			buffer_len = ftell(file);
@@ -177,8 +198,10 @@ int main(int argc, char *argv[])
 		OPENSSL_free(n_char);
 		BN_free(n);
 	}
-	std::string gen = genpasswd(dbid, password, n_str);
 
-	printf("\n\n");
-	printf("alter user sys identified by \"%s\";\n", gen.c_str());
+	std::string gen_password = genpasswd(dbid, passphrase, n_str);
+	
+	std::cout << std::endl
+		  << " " << "alter user sys identified by \"" << gen_password << "\";" << std::endl
+		  << std::endl;		
 }
