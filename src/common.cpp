@@ -89,7 +89,7 @@ ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp)
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 #include <sys/time.h>
 #include <termios.h>
 #include <errno.h>   /* for errno */
