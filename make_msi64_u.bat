@@ -24,8 +24,8 @@ echo %GIT_RELEASE%
 REM for /f "tokens=2 delims=- " %%G IN ("%GIT_RELEASE%") DO set BUILD_NUMBER=%%G
 echo Build Number: %BUILD_NUMBER%
 
-candle.exe dbpass.wxs
-light.exe -ext WixUIExtension -o dbpass.64bit.msi dbpass.wixobj
+candle.exe dbpass_user.wxs
+light.exe -ext WixUIExtension -o dbpass_user.64bit.msi dbpass_user.wixobj
 
 @pause
 

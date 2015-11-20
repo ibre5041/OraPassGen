@@ -45,6 +45,9 @@ add_executable (genn genn.cpp ${common_sources})
 target_link_libraries(genn ${common_libs})
 
 IF(BUILD_QT_GUI)
+IF (WIN32 AND MSVC)
+  LIST(APPEND common_sources win32/dbpass.rc)
+ENDIF (WIN32 AND MSVC)
 
 set(dbpassgui_moc_classes dbpassgui.h completelineedit.h)
 qt5_wrap_ui(dbpassgui_ui_sources ${dbpassgui_ui_src})

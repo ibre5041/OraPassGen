@@ -17,7 +17,7 @@
   <?ifdef env.BUILD_NUMBER?>
   <?define ProductVersion="0.3.$(env.BUILD_NUMBER)"?>
   <?else?>
-  <?define ProductVersion="0.3.0"?>
+  <?define ProductVersion="0.3.1"?>
   <?endif?>
   <?define UpgradeCode="AAAA2F25-E626-4CC5-BC37-86477A2609AC"?>
   <?define BuildType = "RelWithDebInfo" ?>
@@ -32,7 +32,7 @@
 	     Platform="$(var.Platform)"
 	     InstallerVersion="200" Compressed="yes" />
     <Media Id="1" Cabinet="dbpass.cab" EmbedCab="yes" />
-    <Icon Id="dbpass.ico" SourceFile="src\resources\data-storage4.ico" />
+    <Icon Id="dbpass.ico" SourceFile="src\win32\data-storage4.ico" />
     <Property Id="ARPPRODUCTICON" Value="dbpass.ico" />
     <Property Id="ARPHELPLINK" Value="https://github.com/ibre5041/dbpass" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibre5041/dbpass" />
@@ -62,6 +62,7 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)">
 	<Directory Id="INSTALLDIR" Name="DbPass">
+	  <!-- static build 
 	  <Component Id="LIBGLESV2.DLL"    DiskId="1" Win64="$(var.Win64)">
 	    <File Id="libGLESv2.dll"       Name="libGLESv2.dll"    Source="src\$(var.BuildType)\libGLESv2.dll" />
 	  </Component>
@@ -83,6 +84,7 @@
 	  <Component Id="QT5XML.DLL"       DiskId="1" Win64="$(var.Win64)">
 	    <File Id="Qt5Xml.dll"          Name="Qt5Xml.dll"       Source="src\$(var.BuildType)\Qt5Xml.dll" />
 	  </Component>
+	  -->  
 	  <Component Id="DBPASS.EXE"       DiskId="1" Win64="$(var.Win64)">
 	    <File Id="dbpass.exe"          Name="dbpass.exe"       Source="src\$(var.BuildType)\dbpass.exe" />
 	  </Component>
@@ -132,6 +134,7 @@
     <Feature Id="DefaultFeature" Title="Main Feature" Level="1">
       <ComponentRef Id="DBPASS.EXE" />
       <ComponentRef Id="DBPASSGUI.EXE" />
+      <!-- static build
       <ComponentRef Id="LIBGLESV2.DLL" />
       <ComponentRef Id="QT5CORE.DLL" />
       <ComponentRef Id="QT5GUI.DLL" />
@@ -139,6 +142,7 @@
       <ComponentRef Id="QT5WIDGETS.DLL" />
       <ComponentRef Id="QT5WINEXTRAS.DLL" />
       <ComponentRef Id="QT5XML.DLL" />
+      -->
       <ComponentRef Id="ApplicationShortcuts" />
       <ComponentRef Id="DesktopShortcut" />
     </Feature>

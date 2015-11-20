@@ -1,4 +1,5 @@
 For static build, unsure these libs are under Linker -> Input -> Additional dependencies:
+cmake -DMSVC_RUNTIME=static
 
 kernel32.lib
 user32.lib
