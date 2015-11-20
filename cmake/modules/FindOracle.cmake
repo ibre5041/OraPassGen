@@ -27,6 +27,8 @@
 #   Oracle XMLTYPE library libxml?.a (usually static, only present in thick client)
 # ``ORACLE_LIBRARIES``
 #   All Oracle libraries detected libclntsh.so.*, libociei.so.8 libxml.a ....
+# ``ORACLE_STATIC_LIBRARIES``
+#   All Oracle libraries detected libclntsh.so.*, libociei.so.8 libxml.a ....
 # ``ORACLE_OCI_VERSION``
 #   This is set to 8i, 9i, 10g, 11g, 12c
 
@@ -155,31 +157,44 @@ IF (ORACLE_USE_CLNTSH)
 ENDIF (ORACLE_USE_CLNTSH)
 
 IF (ORACLE_USE_CLNTST)
-    # The NO_DEFAULT_PATH is necessary here in the case there is Oracle DB
-    # *and* instant client installed. The order is given in ORACLE_LIB_LOCATION.
-    # See above.
-    # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
-    IF(WIN32)
-	set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    ELSE()
-	set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
-    ENDIF()
+  # The NO_DEFAULT_PATH is necessary here in the case there is Oracle DB
+  # *and* instant client installed. The order is given in ORACLE_LIB_LOCATION.
+  # See above.
+  # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+  IF(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  ELSE()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
+  ENDIF()
 
-    MESSAGE(STATUS "Looking for libclntst")
+  MESSAGE(STATUS "Looking for libclntst")
 
-    FIND_LIBRARY(
-        ORACLE_LIBRARY_CLNTST
-        NAMES libclntst libclntst9 libclntst10 libclntst11 libclntst12 clntst clntst9 clntst10 clntst11 clntst12
-        PATHS ${ORACLE_LIB_LOCATION}
-        NO_DEFAULT_PATH
-	#NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH
+  FIND_LIBRARY(
+    ORACLE_LIBRARY_CLNTST
+    NAMES libclntst libclntst9 libclntst10 libclntst11 libclntst12 clntst clntst9 clntst10 clntst11 clntst12
+    # 12c libclntst12 might also depend on these libs
+    # libnls12 libirc libgeneric12 libcore12 libunls12 libcommon12 libsql12 libclient12 libclntst12 libippdcmerged libippsmerged
+    PATHS ${ORACLE_LIB_LOCATION}
+    NO_DEFAULT_PATH
+    #NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH
     )
-    IF (NOT ORACLE_LIBRARY_CLNTST)
-        IF (Oracle_FIND_REQUIRED)
-            SET(FORCE_ERROR "CLNTST")
-        ENDIF (Oracle_FIND_REQUIRED)
-        set(ORACLE_LIBRARY_CLNTST "")
-    ENDIF (NOT ORACLE_LIBRARY_CLNTST)
+  IF (NOT ORACLE_LIBRARY_CLNTST)
+    IF (Oracle_FIND_REQUIRED)
+      SET(FORCE_ERROR "CLNTST")
+    ENDIF (Oracle_FIND_REQUIRED)
+    set(ORACLE_LIBRARY_CLNTST "")
+  ENDIF (NOT ORACLE_LIBRARY_CLNTST)
+  # Search for icc libs (possibly needed by clntst12)
+  FIND_LIBRARY(ORACLE_LIBRARY_IPPDCMERGED NAMES ippdcmerged PATHS ${ORACLE_LIB_LOCATION} NO_DEFAULT_PATH )
+  FIND_LIBRARY(ORACLE_LIBRARY_LIBIPPSMERGED NAMES ippsmerged PATHS ${ORACLE_LIB_LOCATION} NO_DEFAULT_PATH )
+  LIST(APPEND ORACLE_STATIC_LIBRARIES ${ORACLE_LIBRARY_CLNTST})
+  IF(ORACLE_LIBRARY_IPPDCMERGED)
+    LIST(APPEND ORACLE_STATIC_LIBRARIES ${ORACLE_LIBRARY_IPPDCMERGED})
+  ENDIF()
+  IF(ORACLE_LIBRARY_LIBIPPSMERGED)
+    LIST(APPEND ORACLE_STATIC_LIBRARIES ${ORACLE_LIBRARY_LIBIPPSMERGED})
+  ENDIF()
+  MESSAGE(STATUS "Static libs: ${ORACLE_STATIC_LIBRARIES}")
 ENDIF (ORACLE_USE_CLNTST)
 
 #set (ORACLE_LIBRARY_OCCI "")
