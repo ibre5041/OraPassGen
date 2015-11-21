@@ -152,8 +152,7 @@ DbPassGui::DbPassGui(QWidget * parent)
 void DbPassGui::setVisible(bool visible)
 {
 	minimizeAction->setEnabled(visible);
-	maximizeAction->setEnabled(!isMaximized());
-	restoreAction->setEnabled(isMaximized() || !visible);
+	openAction->setEnabled(!visible);
 	QDialog::setVisible(visible);
 }
 
@@ -244,11 +243,11 @@ void DbPassGui::createActions()
 	minimizeAction = new QAction(tr("Mi&nimize"), this);
 	connect(minimizeAction, SIGNAL(triggered()), this, SLOT(hide()));
 
-	maximizeAction = new QAction(tr("Ma&ximize"), this);
-	connect(maximizeAction, SIGNAL(triggered()), this, SLOT(showMaximized()));
+	configureAction = new QAction(tr("&Configure"), this);
+	connect(configureAction, SIGNAL(triggered()), this, SLOT(showConfigDialog()));
 
-	restoreAction = new QAction(tr("&Restore"), this);
-	connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+	openAction = new QAction(tr("&Open"), this);
+	connect(openAction, SIGNAL(triggered()), this, SLOT(showNormal()));
 
 	quitAction = new QAction(tr("&Quit"), this);
 	connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -270,8 +269,8 @@ void DbPassGui::createTrayIcon()
 {
 	trayIconMenu = new QMenu(this);
 	trayIconMenu->addAction(minimizeAction);
-	trayIconMenu->addAction(maximizeAction);
-	trayIconMenu->addAction(restoreAction);
+	trayIconMenu->addAction(configureAction);
+	trayIconMenu->addAction(openAction);
 	trayIconMenu->addSeparator();
 	trayIconMenu->addAction(quitAction);
 

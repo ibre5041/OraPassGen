@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #ifndef _WIN32
 #include <getopt.h>
 #include <dlfcn.h>
@@ -18,6 +17,7 @@ using namespace trotl;
 
 #include <string>
 #include <ostream>
+#include <iostream>
 
 #include "common.h"
 #include "crypto.h"
@@ -156,9 +156,8 @@ int main(int argc, char *argv[])
 	}			
 #endif
 
-#ifdef __linux__
-	
 	string n_str;
+#ifdef __linux__	
 	void* elf_handle = dlopen(0,RTLD_NOW|RTLD_GLOBAL); // dlopen self
 	// - generate factor file:           genn --decimal -f n.txt
 	// - compile n.txt into .elf format: objcopy --input binary --output elf64-x86-64 --binary-architecture i386 resources/n.txt n.o

@@ -1,0 +1,12 @@
+**/*.filters
+**/*.vcxproj
+**/*.dir
+*.msi
+*.wixobj
+*.wixpdb
+**/*~
+**/moc_*.cpp
+**/moc_*.cpp_parameters
+CMakeCache.txt
+**/CMakeFiles
+**/cmake_install.cmake

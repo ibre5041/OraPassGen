@@ -11,7 +11,7 @@ IF EXIST "%DIR2%"\ SET PATH=%DIR2%;%PATH%
 IF EXIST "%DIR3%"\ SET PATH=%DIR3%;%PATH%
 IF EXIST "%DIR4%"\ SET PATH=%DIR4%;%PATH%
 
-set BUILD_NUMBER=2
+set BUILD_NUMBER=6
 
 REM for /F "tokens=1,2"  %%t  in ('svn info') do @if "%%t"=="Revision:" set BUILD_NUMBER=%%u
 REM echo Build Number: %BUILD_NUMBER%
@@ -25,14 +25,14 @@ REM for /f "tokens=2 delims=- " %%G IN ("%GIT_RELEASE%") DO set BUILD_NUMBER=%%G
 echo Build Number: %BUILD_NUMBER%
 
 candle.exe dbpass_user.wxs
-light.exe -ext WixUIExtension -o dbpass_user.64bit.msi dbpass_user.wixobj
+light.exe -sice:ICE91 -ext WixUIExtension -o dbpass_user.64bit.msi dbpass_user.wixobj
 
 @pause
 
 REM
 REM C:\DEVEL\dbpass>signtool sign /v /f "OSD Ivan Brezina.p12" /P pass ^
 REM /d "Password tool for Oracle" ^
-REM /du "https://github.com/ibre5041/dbpass" ^
+REM /du "https://github.com/ibre5041/OraPassGen" ^
 REM /t http://timestamp.verisign.com/scripts/timstamp.dll ^
 REM src\RelWithDebInfo\*.exe src\RelWithDebInfo\*.dll dbpass.64bit.msi
 REM
@@ -40,6 +40,6 @@ REM
 REM
 REM C:\DEVEL\dbpass>signtool sign /v /f "OSD Ivan Brezina.p12" /P pass ^
 REM /d "Password tool for Oracle" ^
-REM /du "https://github.com/ibre5041/dbpass" ^
+REM /du "https://github.com/ibre5041/OraPassGen" ^
 REM /t http://timestamp.verisign.com/scripts/timstamp.dll dbpass.64bit.msi
 REM

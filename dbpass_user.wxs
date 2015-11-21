@@ -4,22 +4,22 @@
   <!--<?define Platform = x64 ?>-->
   <?define Platform = $(env.BUILD_ARCH) ?>
   <?if $(var.Platform) = x64 ?>
-  <?define ProductName = "DbPass (64 bit)" ?>
+  <?define ProductName = "OraPassGen (64 bit)" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?define PlatformSystemFolder = "System64Folder" ?>
   <?else ?>
-  <?define ProductName = "DbPass" ?>
+  <?define ProductName = "OraPassGen" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?define PlatformSystemFolder = "SystemFolder" ?>
   <?endif ?>
   <?ifdef env.BUILD_NUMBER?>
-  <?define ProductVersion="0.3.$(env.BUILD_NUMBER)"?>
+  <?define ProductVersion="0.8.$(env.BUILD_NUMBER)"?>
   <?else?>
-  <?define ProductVersion="0.3.1"?>
+  <?define ProductVersion="0.8.3"?>
   <?endif?>
-  <?define UpgradeCode="AAAA2F25-E626-4CC5-BC37-86477A2609AC"?>
+  <?define UpgradeCode="31BFD00A-047A-4A57-AD09-5C0846158A6C"?>
   <?define BuildType = "RelWithDebInfo" ?>
   <Product Id="*" 
 	   Name="$(var.ProductName)" Language="1033" 
@@ -32,19 +32,14 @@
 	     InstallPrivileges="limited"
 	     Platform="$(var.Platform)"
 	     InstallerVersion="200" Compressed="yes" />
-    <Media Id="1" Cabinet="dbpass.cab" EmbedCab="yes" />
+    <Media Id="1" Cabinet="opassgen.cab" EmbedCab="yes" />
     <Icon Id="dbpass.ico" SourceFile="src\win32\data-storage4.ico" />
     <Property Id="ARPPRODUCTICON" Value="dbpass.ico" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/ibre5041/dbpass" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibre5041/dbpass" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/ibre5041/OraPassGen" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibre5041/OraPassGen" />
     <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="ASSISTANCE_START_VIA_REGISTRY">1</Property>
 
-    <!--
-    <Property Id="INSTALLLOCATION">
-      <RegistrySearch Id="RegistrySearch" Type="raw" Root="HKLM" Win64="$(var.Win64)"
-		      Key="Software\DbPass\DbPass" Name="InstallLocation" />
-    </Property>
-    !-->
     <!--<WixVariable Id="WixUIBannerBmp" Value="largelogo.bmp" />-->
     <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
 
@@ -56,83 +51,96 @@
 	  Maximum="$(var.ProductVersion)" IncludeMaximum="no" 
 	  Property="PREVIOUSFOUND" />
     </Upgrade>
-    <!--
-	<Condition Message="A newer version of this software is already installed.">
-	NOT NEWERVERSIONDETECTED
-	</Condition>
-    -->
 
+    <!-- Install into user's AppData Folder -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="LocalAppDataFolder" Name="AppData">
-	<Directory Id="AppRootDirectory" Name="DbPass"/>
+	<Directory Id="AppRootDirectory" Name="OraPassGen"/>
       </Directory>
     </Directory>
-    
+
+    <!-- These files will be installed -->
     <DirectoryRef Id="AppRootDirectory">
-      <Component Id="Registration.xml" Guid="f671ee4d-dd0a-4f7f-a4d1-1d181d2f3002" DiskId="1">
+      <Component Id="Registration.xml" Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED88" DiskId="1">
 	<CreateFolder/>
 	<RemoveFolder Id="RemoveAppRootDirectory" On="uninstall" />
-	<!--<File Id="Registration.xml"    Name="Registration.xml" Source="Registration.xml" Checksum="no" />-->
-	<File Id="dbpass.exe"          Name="dbpass.exe"       Source="src\$(var.BuildType)\dbpass.exe" />
+	<File Id="opassgen.exe"        Name="opassgen.exe"     Source="src\$(var.BuildType)\opassgen.exe" />
 	<File Id="dbpassgui.exe"       Name="dbpassgui.exe"    Source="src\$(var.BuildType)\dbpassgui.exe" />
-	<RegistryKey Root="HKCU" Key="Software\DbPass\DbPass"  Action="createAndRemoveOnUninstall">
+	<RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
 	  <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
 	</RegistryKey>
       </Component>
 
-
+      <!-- This will be added into "Start" menu --> 
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ProgramMenuSubfolder" Name="ODbPass">
-          <Component Id="ApplicationShortcuts"
-		     Guid="6e6001f0-d92a-43da-95bd-f21e48b5b37a">
-            <Shortcut Id="ApplicationShortcut1" Name="DbPass"
+        <Directory Id="ProgramMenuSubfolder" Name="OraPassGen">
+          <Component Id="ApplicationShortcuts" Guid="*">
+            <Shortcut Id="ApplicationShortcut1" Name="PasswordGenerator"
 		      Description="Password tool for Oracle"
 		      Target="[AppRootDirectory]dbpassgui.exe"
 		      WorkingDirectory="AppRootDirectory" />
 	    <Shortcut Id="UninstallProduct"             
 		      Name="Uninstall DbPass"
-		      Description="Uninstalls DbPass"
+		      Description="Uninstalls OraPassGen"
 		      Target="[$(var.PlatformSystemFolder)]msiexec.exe"
 		      Arguments="/x [ProductCode]"/>
-            <RegistryValue Root="HKCU" Key="Software\DbPass\DbPass"
+            <RegistryValue Root="HKCU" Key="Software\OraPassGen\OraPassGen"
 			   Name="installed" Type="integer" Value="1" KeyPath="yes" />
             <RemoveFolder Id="ProgramMenuSubfolder" On="uninstall" />
           </Component>
         </Directory>
       </Directory>
 
+      <!-- 
       <Directory Id="DesktopFolder" Name="Desktop">
-	<Component Id="DesktopShortcut" Guid="EC9BAF82-9766-481B-8E03-62754F190BBB">
+	<Component Id="DesktopShortcut" Guid="*">
 	  <Condition>INSTALLDESKTOPSHORTCUT</Condition>
 	  <CreateFolder/>
-	  <RegistryKey Root="HKCU" Key="Software\DbPass\DbPass">
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen">
 	    <RegistryValue Name="DTSC" Value="1" Type="integer" KeyPath="yes" />
 	  </RegistryKey>
-	  <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="DbPass" Target="[AppRootDirectory]dbpassgui.exe" WorkingDirectory="AppRootDirectory" />
+	  <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="Orapassgen" Target="[AppRootDirectory]dbpassgui.exe" WorkingDirectory="AppRootDirectory" />
 	</Component>
-	</Directory>
+      </Directory>
+      -->
 
+      <!-- Auto-start via Registry -->
+      <Component Id="OrapassgenAutostart" Guid="*">
+	<!-- Wix resolves HKMU to HKLM if you tick 'for all users' in the installer or to HKCU if you don't -->
+	<RegistryValue Id="dbpass.rst" Root="HKMU" Action="write"
+		       Key="Software\Microsoft\Windows\CurrentVersion\Run"
+		       Name="Password tool for Oracle"
+		       Value="[AppRootDirectory]dbpassgui.exe"
+		       Type="string" />
+	<Condition>ASSISTANCE_START_VIA_REGISTRY</Condition>
+      </Component>
+            
     </DirectoryRef>
 
     <InstallExecuteSequence>
-      <!--<RemoveExistingProducts After="InstallValidate" />-->
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
 
     <Feature Id="DefaultFeature" Title="Main Feature" Level="1">
       <ComponentRef Id="Registration.xml" />
       <ComponentRef Id="ApplicationShortcuts" />
-      <ComponentRef Id="DesktopShortcut" />      
+      <!--<ComponentRef Id="DesktopShortcut" /> -->
+      <ComponentRef Id="OrapassgenAutostart" />
     </Feature>
-
 
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" />
     <!--<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />-->
-    <UIRef Id="WixUI_Minimal"/>
+    <UI>
+      <UIRef Id="WixUI_Minimal"/>
+      <Publish Dialog="ExitDialog"
+	       Control="Finish"
+	       Event="DoAction"
+	       Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+    </UI>
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch DbPass" />
-    <Property Id="WixShellExecTarget" Value="dbpassgui.exe" />
+    <Property Id="WixShellExecTarget" Value="[#dbpassgui.exe]" />
     <!-- Step 3: Include the custom action -->
-    <CustomAction Id="LaunchApplication" FileKey="dbpassgui.exe" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
+    <CustomAction Id="LaunchApplication" FileKey="dbpassgui.exe" ExeCommand="" Execute="immediate" Return="asyncNoWait" Impersonate="yes"/>
   </Product>
 </Wix>
 

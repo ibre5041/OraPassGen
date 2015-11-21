@@ -44,8 +44,8 @@ private:
 	void setDbid(QString const&);
 
 	QAction *minimizeAction;
-	QAction *maximizeAction;
-	QAction *restoreAction;
+	QAction *configureAction;
+	QAction *openAction;
 	QAction *quitAction;
 
 	QIcon *icon;

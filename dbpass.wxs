@@ -31,11 +31,11 @@
 	     InstallScope="perMachine" 
 	     Platform="$(var.Platform)"
 	     InstallerVersion="200" Compressed="yes" />
-    <Media Id="1" Cabinet="dbpass.cab" EmbedCab="yes" />
-    <Icon Id="dbpass.ico" SourceFile="src\win32\data-storage4.ico" />
-    <Property Id="ARPPRODUCTICON" Value="dbpass.ico" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/ibre5041/dbpass" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibre5041/dbpass" />
+    <Media Id="1" Cabinet="opassgen.cab" EmbedCab="yes" />
+    <Icon Id="opassgen.ico" SourceFile="src\win32\data-storage4.ico" />
+    <Property Id="ARPPRODUCTICON" Value="opassgen.ico" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/ibre5041/opassgen" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ibre5041/opassgen" />
     <Property Id="ARPNOREPAIR" Value="1" />
     <Property Id="INSTALLLOCATION">
       <RegistrySearch Id="RegistrySearch" Type="raw" Root="HKLM" Win64="$(var.Win64)"
@@ -86,7 +86,7 @@
 	  </Component>
 	  -->  
 	  <Component Id="DBPASS.EXE"       DiskId="1" Win64="$(var.Win64)">
-	    <File Id="dbpass.exe"          Name="dbpass.exe"       Source="src\$(var.BuildType)\dbpass.exe" />
+	    <File Id="opassgen.exe"          Name="opassgen.exe"       Source="src\$(var.BuildType)\opassgen.exe" />
 	  </Component>
 	  <Component Id="DBPASSGUI.EXE"    DiskId="1" Win64="$(var.Win64)">
 	    <File Id="dbpassgui.exe"       Name="dbpassgui.exe"    Source="src\$(var.BuildType)\dbpassgui.exe" />
@@ -100,7 +100,7 @@
 		     Guid="6e6901f0-d92a-43da-95bd-f21e48b5b37a">
             <Shortcut Id="ApplicationShortcut1" Name="DbPass"
 		      Description="Password tool for Oracle"
-		      Target="[INSTALLDIR]dbpass.exe"
+		      Target="[INSTALLDIR]opassgen.exe"
 		      WorkingDirectory="INSTALLDIR" />
 	    <Shortcut Id="UninstallProduct"             
 		      Name="Uninstall DbPass"

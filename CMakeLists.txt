@@ -1,8 +1,10 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.6) # 2.6 is present on RHEL6
 project (DBPASS)
 
+CMAKE_POLICY(SET CMP0020 OLD)
+
 OPTION(BUILD_QT_GUI "Build also the gui part" OFF)
-OPTION(BUILD_STATIC "Static link (Linux only)" ON)
+OPTION(BUILD_STATIC "Static link" ON)
 
 SET (VERSION_MAJOR "0")
 SET (VERSION_MINOR "0")
