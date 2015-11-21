@@ -59,6 +59,7 @@ IF (WIN32 AND MSVC)
   LIST(APPEND common_sources win32/dbpass.rc)
   LIST(APPEND dbpassguiui_libs Qt5::WinMain)
   IF(BUILD_STATIC)
+    ADD_DEFINITIONS(-DBUILD_STATIC)
     # Force static runtime libraries
     FOREACH(flag
       CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO

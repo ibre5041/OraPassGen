@@ -22,7 +22,7 @@
 #include <QtWidgets>
 #include <QDomDocument>
 
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32) && defined(BUILD_STATIC)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 Q_IMPORT_PLUGIN(QSvgIconPlugin)
