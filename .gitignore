@@ -7,6 +7,8 @@
 **/*~
 **/moc_*.cpp
 **/moc_*.cpp_parameters
+**/ui_*ui.h
 CMakeCache.txt
 **/CMakeFiles
 **/cmake_install.cmake
+*.p12
