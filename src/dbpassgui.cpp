@@ -13,6 +13,7 @@
 #include "crypto.h"
 #include "dbutils.h"
 #include "dbpassgui.h"
+#include "configgui.h"
 
 #include "completelineedit.h"
 
@@ -389,6 +390,10 @@ void DbPassGui::showConfigDialog()
 	QString appDir = qApp->applicationDirPath();
 	if (!config)
 	{
+		config = new ConfigGui(this);
+		config->setWindowIcon(*icon);
+		config->setWindowTitle(tr("DbPass Configuration"));
+		config->setWindowFlags(Qt::WindowStaysOnTopHint);
 	}
 
 	std::cout << "defaultConfigPath: " << defaultConfigPath.toStdString() << std::endl
@@ -396,4 +401,6 @@ void DbPassGui::showConfigDialog()
 		  << "configFilePath: " << configFilePath.toStdString() << std::endl
 		  << "configURLPath: " << configURLPath.toStdString() << std::endl
 		  << "appDir: " << appDir.toStdString() << std::endl;
+	config->showNormal();
+	config->show();
 }

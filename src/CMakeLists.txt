@@ -10,7 +10,7 @@ ELSE ()
   add_subdirectory(trotl)
 ENDIF(WIN32)
 
-SET(dbpassgui_ui_src dbpassguiui.ui)
+SET(dbpassgui_ui_src dbpassguiui.ui configui.ui)
 
 SET(common_sources common.cpp crypto.cpp)
 if(WIN32)
@@ -87,13 +87,14 @@ IF (WIN32 AND MSVC)
   ENDIF()
 ENDIF (WIN32 AND MSVC)
 
-set(dbpassgui_moc_classes dbpassgui.h completelineedit.h)
+set(dbpassgui_moc_classes dbpassgui.h configgui.h completelineedit.h)
 qt5_wrap_ui(dbpassgui_ui_sources ${dbpassgui_ui_src})
 qt5_wrap_cpp(dbpassgui_moc_sources ${dbpassgui_moc_classes})
 qt5_add_resources(dbpassgui_rcc_srcs systray.qrc)
 
 add_executable (dbpassgui ${GUI_TYPE}
   dbpassgui.cpp
+  configgui.cpp
   dbutils.cpp
   completelineedit.cpp
   ${common_sources}
