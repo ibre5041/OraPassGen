@@ -22,7 +22,6 @@
 #include <QtGui>
 #include <QtWidgets>
 #include <QDomDocument>
-#include <QStandardPaths>
 
 #if defined(Q_OS_WIN32) && defined(BUILD_STATIC)
 #include <QtPlugin>
@@ -377,30 +376,14 @@ void DbPassGui::setDbid(QString const& dbid)
 	QTimer::singleShot(30000, this, SLOT(clearAll()));
 }
 
-#include <ostream>
-#include <iostream>
 void DbPassGui::showConfigDialog()
 {
-	QString defaultConfigPath = QStandardPaths::locate(QStandardPaths::AppLocalDataLocation, "servers.xml");
-	QString defaultConfigDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-	settings.beginGroup("DbPassGui");
-	QString configFilePath = settings.value("filepath").toString();
-	QString configURLPath = settings.value("urlpath").toString();
-	settings.endGroup();
-	QString appDir = qApp->applicationDirPath();
 	if (!config)
 	{
-		config = new ConfigGui(this);
+		config = new ConfigGui(NULL, Qt::Dialog | Qt::Window | Qt::WindowStaysOnTopHint);
 		config->setWindowIcon(*icon);
 		config->setWindowTitle(tr("DbPass Configuration"));
 		config->setWindowFlags(Qt::WindowStaysOnTopHint);
 	}
-
-	std::cout << "defaultConfigPath: " << defaultConfigPath.toStdString() << std::endl
-		  << "defaultConfigDir: " << defaultConfigDir.toStdString() << std::endl
-		  << "configFilePath: " << configFilePath.toStdString() << std::endl
-		  << "configURLPath: " << configURLPath.toStdString() << std::endl
-		  << "appDir: " << appDir.toStdString() << std::endl;
 	config->showNormal();
-	config->show();
 }

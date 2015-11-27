@@ -12,3 +12,10 @@ CMakeCache.txt
 **/CMakeFiles
 **/cmake_install.cmake
 *.p12
+.vs
+DBPASS.*
+**/Debug
+**/Release
+**/RelWithDebInfo
+**/*.depends
+**/qrc_*.cpp
