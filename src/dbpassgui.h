@@ -38,6 +38,8 @@ private slots:
 	void hostnameCleared(const QString &);
 	void sidCleared(const QString &);
 	void clearAll();
+
+	void showConfigDialog();
 private:
 	void createActions();
 	void createTrayIcon();
@@ -51,6 +53,8 @@ private:
 	QIcon *icon;
 	QSystemTrayIcon *trayIcon;
 	QMenu *trayIconMenu;
+
+	QDialog *config;
 
 	QSettings settings;
 	QString n;
