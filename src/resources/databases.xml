@@ -6,6 +6,7 @@
     <sid value="CCC">4564645</sid>
     <sid value="ddd1">4564645</sid>
   </host>
+  <!--
   <host value="Server235">
     <sid value="AAA">34563456</sid>
     <sid value="BBB">34535653</sid>
@@ -23,5 +24,6 @@
     <sid value="RBBB2">12344560</sid>
     <sid value="RCCC2">45646450</sid>
     <sid value="RDDD2">45646450</sid>
-  </host>
+    </host>
+    -->
 </registry>

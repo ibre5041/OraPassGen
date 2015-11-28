@@ -59,9 +59,13 @@ int main(int argc, char *argv[])
 DbPassGui::DbPassGui(QWidget * parent)
 	: QDialog(parent)
 	, icon(new QIcon(":/resources/data-storage4.svg"))
-	, config(NULL)
+	, config(new ConfigGui(NULL, Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowTitleHint))
 {
 	setupUi(this);
+
+	config->setWindowIcon(*icon);
+	config->setWindowTitle(tr("DbPass Configuration"));
+	config->setWindowFlags(Qt::WindowStaysOnTopHint);
 
 	QRegExp number("[0-9]+");
 	dbidEdit->setValidator(new QRegExpValidator(number, dbidEdit));
@@ -72,7 +76,8 @@ DbPassGui::DbPassGui(QWidget * parent)
 	int width = fm.width(char16);
 	passphraseEdit->setMinimumWidth(width+10);
 	generatedPasswordEdit->setMinimumWidth(width+10);
-	generatedPasswordEdit->setStyleSheet("QLineEdit[readOnly=\"true\"] {"
+	generatedPasswordEdit->setStyleSheet(
+		"QLineEdit[readOnly=\"true\"] {"
 		"color: #808080;"
 		"background-color: #F0F0F0;"
 		"border: 1px solid #B0B0B0;"
@@ -87,51 +92,20 @@ DbPassGui::DbPassGui(QWidget * parent)
 	createActions();
 	createTrayIcon();
 	
+	settings.beginGroup("DbPassGui");
+	QString configFilePath = settings.value("filepath").toString();
+	settings.endGroup();
+
+	QFileInfo file(configFilePath);
+	if (file.isReadable())
+		loadSeversFromFile(file.absoluteFilePath());
+	else
+		loadSeversFromFile(":/resources/databases.xml");
+
 	QFile nfile(":/resources/n.txt");
 	nfile.open(QIODevice::ReadOnly);
 	QTextStream in(&nfile);
 	n = in.readAll();
-
-	QFile xmlfile(":/resources/databases.xml");
-	xmlfile.open(QIODevice::ReadOnly);
-	QDomDocument doc;
-	doc.setContent(&xmlfile);
-	QDomElement docElem = doc.documentElement();
-	QDomNode node = docElem.firstChild();
-	while (!node.isNull())
-	{
-		QString hostname = node.toElement().attribute("value");
-		printf("%s\n", hostname.toStdString().c_str());
-		QDomNode child = node.firstChild();
-		while (!child.isNull())
-		{
-			QString sid = child.toElement().attribute("value");
-			QString dbid = child.toElement().text();
-			printf(" %s\t%s\n", sid.toStdString().c_str(), dbid.toStdString().c_str());
-			
-			if (hostSidToDbid.contains(hostname))
-			{
-				hostSidToDbid[hostname][sid] = dbid;
-			} else {
-				hostSidToDbid.insert(hostname, QMap<QString, QString>());
-				hostSidToDbid[hostname][sid] = dbid;
-			}
-
-			if (sidHostToDbid.contains(sid))
-			{
-				sidHostToDbid[sid][hostname] = dbid;
-			}
-			else {
-				sidHostToDbid.insert(sid, QMap<QString, QString>());
-				sidHostToDbid[sid][hostname] = dbid;
-			}
-			child = child.nextSibling();
-		}
-		//do something
-		node = node.nextSibling();
-	}
-	hostnameEdit->setWords(hostSidToDbid.keys());
-	sidEdit->setWords(sidHostToDbid.keys());
 
 	dbidEdit->installEventFilter(this);
 
@@ -263,6 +237,7 @@ void DbPassGui::createActions()
 	connect(hostnameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(hostnameCleared(const QString&)));
 	connect(sidEdit, SIGNAL(textChanged(const QString&)), this, SLOT(sidCleared(const QString&)));
 
+	connect(config, SIGNAL(newServerList(QString)), this, SLOT(refreshConfig(QString)));
 	flipCheckBoxA(showPassphraseCheckbox->checkState());
 	flipCheckBoxB(showGeneratedPasswordCheckbox->checkState());
 }
@@ -378,14 +353,57 @@ void DbPassGui::setDbid(QString const& dbid)
 
 void DbPassGui::showConfigDialog()
 {
-	if (!config)
-	{
-		config = new ConfigGui(NULL, Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowTitleHint);
-		config->setWindowIcon(*icon);
-		config->setWindowTitle(tr("DbPass Configuration"));
-		config->setWindowFlags(Qt::WindowStaysOnTopHint);
-	}
 	config->raise();
 	config->setWindowState(Qt::WindowActive);
 	config->showNormal();
+}
+
+void DbPassGui::refreshConfig(QString filename)
+{
+	loadSeversFromFile(filename);
+}
+
+void DbPassGui::loadSeversFromFile(QString filename)
+{
+	QFile xmlfile(filename);
+	xmlfile.open(QIODevice::ReadOnly);
+	QDomDocument doc;
+	doc.setContent(&xmlfile);
+	QDomElement docElem = doc.documentElement();
+	QDomNode node = docElem.firstChild();
+	while (!node.isNull())
+	{
+		QString hostname = node.toElement().attribute("value");
+		printf("%s\n", hostname.toStdString().c_str());
+		QDomNode child = node.firstChild();
+		while (!child.isNull())
+		{
+			QString sid = child.toElement().attribute("value");
+			QString dbid = child.toElement().text();
+			printf(" %s\t%s\n", sid.toStdString().c_str(), dbid.toStdString().c_str());
+
+			if (hostSidToDbid.contains(hostname))
+			{
+				hostSidToDbid[hostname][sid] = dbid;
+			}
+			else {
+				hostSidToDbid.insert(hostname, QMap<QString, QString>());
+				hostSidToDbid[hostname][sid] = dbid;
+			}
+
+			if (sidHostToDbid.contains(sid))
+			{
+				sidHostToDbid[sid][hostname] = dbid;
+			}
+			else {
+				sidHostToDbid.insert(sid, QMap<QString, QString>());
+				sidHostToDbid[sid][hostname] = dbid;
+			}
+			child = child.nextSibling();
+		}
+		//do something
+		node = node.nextSibling();
+	}
+	hostnameEdit->setWords(hostSidToDbid.keys());
+	sidEdit->setWords(sidHostToDbid.keys());
 }

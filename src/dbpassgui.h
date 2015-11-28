@@ -29,7 +29,7 @@ public slots:
 
 protected:
 	void closeEvent(QCloseEvent *event);
-
+	void loadSeversFromFile(QString filename);
 private slots:
 	void iconActivated(QSystemTrayIcon::ActivationReason reason);
 	void generatePressed();
@@ -43,7 +43,7 @@ private slots:
 	void clearAll();
 
 	void showConfigDialog();
-
+	void refreshConfig(QString filename);
 private:
 	void createActions();
 	void createTrayIcon();

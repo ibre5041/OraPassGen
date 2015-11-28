@@ -69,7 +69,7 @@ IF (WIN32 AND MSVC)
       STRING(REPLACE "/MD"  "/MT" "${flag}" "${${flag}}")
     SET("${flag}" "${${flag}} /EHsc")
     ENDFOREACH()
-    LIST(APPEND dbpassguiui_libs Ws2_32.lib GlU32.Lib OpenGL32.Lib imm32.lib winmm.lib)
+    LIST(APPEND dbpassguiui_libs Ws2_32.lib GlU32.Lib OpenGL32.Lib imm32.lib winmm.lib crypt32.lib)
     # http://stackoverflow.com/questions/32010314/qt5-5-how-can-i-include-qts-qtpcre-lib-and-qtharfbuzzng-lib-with-cmake
     # QTBUG-47349, QTBUG-47336
     LIST(APPEND dbpassguiui_libs
