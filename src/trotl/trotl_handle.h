@@ -273,7 +273,10 @@ struct TROTL_EXPORT OciEnvAlloc : public OciSimpleHandle<OCIEnv>
 		//sword res = OCICALL(OCIEnvCreate(&_handle, oci_mode, 0/*ctxp*/, 0, 0, 0, 0/*xtramem_sz*/, 0/*usrmempp*/));
 		sword res = OCICALL(OCIEnvNlsCreate(&_handle, oci_mode, 0/*ctxp*/, 0, 0, 0, 0/*xtramem_sz*/, 0/*usrmempp*/, cs, ncs));
 		//std::cerr << "OCIEnvCreate:" << res << std::endl;
-		oci_check_error(__TROTL_HERE__, _handle, res);
+		HandleType *h = _handle;
+		if (res == -1)
+			_handle = NULL;
+		oci_check_error(__TROTL_HERE__, h, res);
 	}
 
 	~OciEnvAlloc()
