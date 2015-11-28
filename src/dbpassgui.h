@@ -9,6 +9,7 @@ class QLabel;
 class QLineEdit;
 class QMenu;
 class QPushButton;
+class ConfigGui;
 
 #include "ui_dbpassguiui.h"
 
@@ -18,8 +19,10 @@ class DbPassGui : public QDialog, public Ui_DbPassGui
 
 public:
 	DbPassGui(QWidget * parent = 0);
+
 	void setVisible(bool visible);
 	bool eventFilter(QObject *obj, QEvent *event);
+
 public slots:
 	void showNormal();
 	void hide();
@@ -40,6 +43,7 @@ private slots:
 	void clearAll();
 
 	void showConfigDialog();
+
 private:
 	void createActions();
 	void createTrayIcon();
@@ -54,7 +58,7 @@ private:
 	QSystemTrayIcon *trayIcon;
 	QMenu *trayIconMenu;
 
-	QDialog *config;
+	ConfigGui *config;
 
 	QSettings settings;
 	QString n;

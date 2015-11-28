@@ -380,10 +380,12 @@ void DbPassGui::showConfigDialog()
 {
 	if (!config)
 	{
-		config = new ConfigGui(NULL, Qt::Dialog | Qt::Window | Qt::WindowStaysOnTopHint);
+		config = new ConfigGui(NULL, Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowTitleHint);
 		config->setWindowIcon(*icon);
 		config->setWindowTitle(tr("DbPass Configuration"));
 		config->setWindowFlags(Qt::WindowStaysOnTopHint);
 	}
+	config->raise();
+	config->setWindowState(Qt::WindowActive);
 	config->showNormal();
 }

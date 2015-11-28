@@ -108,6 +108,7 @@ target_link_libraries(dbpassgui
   ${Qt5Gui_LIBRARIES}           # dynamic qt5
   ${Qt5Widgets_LIBRARIES}       # dynamic qt5
   ${Qt5Xml_LIBRARIES}           # dynamic qt5
+  ${Qt5Network_LIBRARIES}       # dynamic qt5
   ${dbpassguiui_libs}
   )
 ENDIF()

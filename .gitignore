@@ -19,3 +19,13 @@ DBPASS.*
 **/RelWithDebInfo
 **/*.depends
 **/qrc_*.cpp
+**/Makefile
+**/dbpass
+**/dbpassgui
+**/genn
+**/opassgen
+**/*.a
+**/*.o
+
+
+									
