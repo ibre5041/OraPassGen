@@ -9,8 +9,10 @@
 #ifndef _WIN32
 #include <getopt.h>
 #include <dlfcn.h>
+#ifdef ORACLE_FOUND
 #include "trotl.h"
 using namespace trotl;
+#endif
 #else
 #include "getopt_long.h"
 #endif
@@ -126,7 +128,7 @@ int main(int argc, char *argv[])
 		passphrase_length = nchr;
 	}
 
-#ifndef _WIN32
+#if defined(__unix__) && defined(ORACLE_FOUND)
 	if (dbid.empty())
 	try
 	{ // connect / as sysdba

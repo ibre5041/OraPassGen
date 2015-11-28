@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+#include <string.h>
+
 using namespace std;
 
 string genpasswd(string const& dbid, string const& passphrase, string const& n_str)
@@ -53,27 +55,10 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 
 	size_t r2_m_char_len = 4 * (SHA224_DIGEST_LENGTH / 3) + (SHA224_DIGEST_LENGTH % 3 != 0 ? 4 : 0);
 	char *r2_m_char = (char*)calloc(1, r2_m_char_len);
-
+	size_t r2_len;
 	// base64 encode sha224(r)
-	{
-		BIO *bio, *b64;
-		BUF_MEM *bufferPtr;
-
-		b64 = BIO_new(BIO_f_base64());
-		bio = BIO_new(BIO_s_mem());
-		bio = BIO_push(b64, bio);
-
-		BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
-		BIO_write(bio, r_sha, SHA224_DIGEST_LENGTH);
-		BIO_flush(bio);
-		BIO_get_mem_ptr(bio, &bufferPtr);
-		BIO_set_close(bio, BIO_NOCLOSE);
-
-		memcpy(r2_m_char, bufferPtr->data, bufferPtr->length - 1);
-		r2_m_char[bufferPtr->length - 1] = 0;
-		r2_m_char[GENPW] = 0; // truncate to max password len
-		BIO_free_all(bio);
-	}
+	r2_m_char = base64_encode(r_sha, SHA224_DIGEST_LENGTH, &r2_len);
+	r2_m_char[GENPW] = 0; // truncate to max password len
 
 	{
 		for (size_t i=0; i < GENPW; i++)
@@ -102,7 +87,7 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	}
 
 	if (verbose_flag)
-		printf("r2 %s\n", r2_m_char);
+		printf("r2 %s %d\n", r2_m_char, strnlen(r2_m_char, r2_m_char_len));
 
 	retval = r2_m_char;
 

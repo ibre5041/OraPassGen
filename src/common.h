@@ -20,5 +20,6 @@ typedef SSIZE_T ssize_t;
 #define MAXPW 32
 #define GENPW 30
 ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp);
+char *base64_encode(const unsigned char *data, size_t input_length, size_t *output_length);
 
 extern int verbose_flag;
