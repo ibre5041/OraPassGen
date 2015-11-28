@@ -3,8 +3,10 @@
 
 #include <openssl/bn.h>
 #include <openssl/md5.h>
+#include <openssl/sha.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
+#include <openssl/buffer.h>
 
 #include <iostream>
 
@@ -14,84 +16,105 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 {
 	static BN_CTX *ctx = BN_CTX_new();
 	string retval;
-	char *a_char(0), *p_char(0), *n_char(0), *r_char(0);
+	char *a_o_char(0), *p_o_char(0), *n_o_char(0), *r_o_char(0);
 	int rc;
 
 	// use password hash as number "a"
 	unsigned char a_md5[MD5_DIGEST_LENGTH];
 	MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
-	BIGNUM *a = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
+	BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
 	if (verbose_flag)
-		printf("m %s\n", a_char = BN_bn2hex(a));
+		printf("m %s\n", a_o_char = BN_bn2hex(a_bn));
 
 	// use dbid as exponent "p" number
-	BIGNUM *p = BN_new();
-	rc = BN_dec2bn(&p, dbid.c_str());
+	BIGNUM *p_bn = BN_new();
+	rc = BN_dec2bn(&p_bn, dbid.c_str());
 	if (verbose_flag)
-		printf("p %s\n", p_char = BN_bn2dec(p));
+		printf("p %s\n", p_o_char = BN_bn2dec(p_bn));
 
 	// convert n_str into n number
-	BIGNUM *n = BN_new();
-	rc = BN_dec2bn(&n, n_str.c_str());
+	BIGNUM *n_bn = BN_new();
+	rc = BN_dec2bn(&n_bn, n_str.c_str());
 	if (verbose_flag)
-		printf("n %s\n", n_char = BN_bn2dec(n));
+		printf("n %s\n", n_o_char = BN_bn2dec(n_bn));
 
 	// compute r = a ^ p mod n
-	BIGNUM *r = BN_new();
-	rc = BN_mod_exp(r, a, p, n, ctx);
+	BIGNUM *r_bn = BN_new();
+	rc = BN_mod_exp(r_bn, a_bn, p_bn, n_bn, ctx);
 	if (verbose_flag)
-		printf("r %s\n", r_char = BN_bn2dec(r));
+		printf("r %s\n", r_o_char = BN_bn2dec(r_bn));
 
-	// compute md5(r)
-	int r_len = BN_num_bytes(r);
-	unsigned char* r_bin = (unsigned char*)malloc(r_len);
-	rc = BN_bn2bin(r, r_bin);
-	unsigned char r_md5[MD5_DIGEST_LENGTH];
-	MD5(r_bin, r_len, r_md5);
+	// compute sha(r)
+	int r_len = BN_num_bytes(r_bn);
+	unsigned char* r_m_bin = (unsigned char*)calloc(1, r_len);
+	rc = BN_bn2bin(r_bn, r_m_bin);
+	unsigned char r_sha[SHA224_DIGEST_LENGTH];
+	SHA224(r_m_bin, r_len, r_sha);
 
-	// get hexa representation of md5(r)
-	BIGNUM *r2 = BN_bin2bn(r_md5, MD5_DIGEST_LENGTH, NULL);
-	char *r2_char = BN_bn2hex(r2);
+	size_t r2_m_char_len = 4 * (SHA224_DIGEST_LENGTH / 3) + (SHA224_DIGEST_LENGTH % 3 != 0 ? 4 : 0);
+	char *r2_m_char = (char*)calloc(1, r2_m_char_len);
+
+	// base64 encode sha224(r)
+	{
+		BIO *bio, *b64;
+		BUF_MEM *bufferPtr;
+
+		b64 = BIO_new(BIO_f_base64());
+		bio = BIO_new(BIO_s_mem());
+		bio = BIO_push(b64, bio);
+
+		BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
+		BIO_write(bio, r_sha, SHA224_DIGEST_LENGTH);
+		BIO_flush(bio);
+		BIO_get_mem_ptr(bio, &bufferPtr);
+		BIO_set_close(bio, BIO_NOCLOSE);
+
+		memcpy(r2_m_char, bufferPtr->data, bufferPtr->length - 1);
+		r2_m_char[bufferPtr->length - 1] = 0;
+		r2_m_char[GENPW] = 0; // truncate to max password len
+		BIO_free_all(bio);
+	}
 
 	{
-		// 1st character of password must be a alpha not a digit
-		if (isdigit(r2_char[0]))
-		{
-			r2_char[0] = 'A' + (r2_char[0] - '0');
-		}
+		for (size_t i=0; i < GENPW; i++)
+			if ( r2_m_char[i] == '/' || r2_m_char[i] == '+')
+				r2_m_char[i] = '_'; // comply with Oracle password allowed chars
+
+		// 1st character of password must be uppercase alpha not a digit
+		if (r2_m_char[0] == '_')
+			r2_m_char[0] = 'A';
+		if (isdigit(r2_m_char[0]))
+			r2_m_char[0] = 'A' + (r2_m_char[0] - '0');
+		if (isalpha(r2_m_char[0]) && islower(r2_m_char[0]))
+			r2_m_char[0] = 'A' + (r2_m_char[0] - 'a');
 
 		// 2st character of password must be lowercase alpha
-		if (isdigit(r2_char[1]))
-		{
-			r2_char[1] = 'a' + (r2_char[1] - '0');
-		}
-		if (isalpha(r2_char[1]) && isupper(r2_char[1]))
-		{
-			r2_char[1] = 'a' + (r2_char[1] - 'A');
-		}
+		if (r2_m_char[1] == '_')
+			r2_m_char[1] = 'a';
+		if (isdigit(r2_m_char[1]))
+			r2_m_char[1] = 'a' + (r2_m_char[1] - '0');
+		if (isalpha(r2_m_char[1]) && isupper(r2_m_char[1]))
+			r2_m_char[1] = 'a' + (r2_m_char[1] - 'A');
+
 		// 3rd character of password must be digit
-		if (!isdigit(r2_char[2]))
-		{
-			r2_char[2] = '0';
-		}
+		if (!isdigit(r2_m_char[2]))
+			r2_m_char[2] = '0';
 	}
 
 	if (verbose_flag)
-		printf("r2 %s\n", r2_char);
+		printf("r2 %s\n", r2_m_char);
 
-	retval = r2_char;
+	retval = r2_m_char;
 
-	free(r_bin);
-	OPENSSL_free(r2_char);
-	OPENSSL_free(r_char);	
-	OPENSSL_free(n_char);
-	OPENSSL_free(p_char);
-	OPENSSL_free(a_char);
+	free(r2_m_char);
+	free(r_m_bin);
+	OPENSSL_free(r_o_char);	
+	OPENSSL_free(n_o_char);
+	OPENSSL_free(p_o_char);
+	OPENSSL_free(a_o_char);
 
-	//BN_CTX_free(ctx);
-	BN_free(r2);
-	BN_free(r);
-	BN_free(a);
-	BN_free(n);
+	BN_free(r_bn);
+	BN_free(a_bn);
+	BN_free(n_bn);
 	return retval;
 }

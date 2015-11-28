@@ -18,7 +18,7 @@ typedef SSIZE_T ssize_t;
 #define N_FILE_HEX "n.hex"
 
 #define MAXPW 32
-#define GENPW MD5_DIGEST_LENGTH
+#define GENPW 30
 ssize_t getpasswd (char **pw, size_t sz, int mask, FILE *fp);
 
 extern int verbose_flag;
