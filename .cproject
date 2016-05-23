@@ -1,30 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="cdt.managedbuild.toolchain.gnu.base.1756692283">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.base.1756692283" moduleId="org.eclipse.cdt.core.settings" name="Default">
+		<cconfiguration id="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 				<externalSettings/>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" id="cdt.managedbuild.toolchain.gnu.base.1756692283" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
-					<folderInfo id="cdt.managedbuild.toolchain.gnu.base.1756692283.235505985" name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.base.1047942656" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.225292679" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-							<builder id="cdt.managedbuild.target.gnu.builder.base.1382822199" managedBuildOn="false" name="Gnu Make Builder.Default" superClass="cdt.managedbuild.target.gnu.builder.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.993618956" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.2117962428" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.789895367" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1907186045" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1285702489" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.base.666840542" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base"/>
+				<configuration buildProperties="" description="" id="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692" name="Debug" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692.53846283" name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.msvc.toolchain.dll.debug.425761210" name="Microsoft Visual C++" superClass="org.eclipse.cdt.msvc.toolchain.dll.debug">
+							<targetPlatform id="org.eclipse.cdt.msvc.targetPlatform.dll.debug.1278819417" superClass="org.eclipse.cdt.msvc.targetPlatform.dll.debug"/>
+							<builder buildPath="${workspace_loc:/OraPassGen}/Debug" id="org.eclipse.cdt.msvc.builder.852135662" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.msvc.builder"/>
+							<tool id="org.eclipse.cdt.msvc.cl.c.dll.debug.1788493175" name="C Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.c.dll.debug">
+								<option id="org.eclipse.cdt.msvc.cl.option.includes.2034402084" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\MSVC2015\VC\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\openssl\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtCore&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtXml&quot;"/>
+								</option>
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.c.1122182216" superClass="org.eclipse.cdt.msvc.cl.inputType.c"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.cl.dll.debug.1618398612" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.dll.debug">
+								<option id="org.eclipse.cdt.msvc.cl.option.includes.1669941161" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\MSVC2015\VC\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\openssl\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtCore&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtWidgets&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtGui&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtXml&quot;"/>
+								</option>
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.997663042" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.rc.dll.debug.267026629" name="Resource Compiler (rc)" superClass="org.eclipse.cdt.msvc.rc.dll.debug">
+								<option id="org.eclipse.cdt.msvc.rc.option.includes.447894053" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.rc.option.includes" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\MSVC2015\VC\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\openssl\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtCore&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\oracle\qt5-5.5.1-vs2015\qt5-x64-static-release\include\QtXml&quot;"/>
+								</option>
+								<inputType id="org.eclipse.cdt.msvc.rc.inputType.375547470" superClass="org.eclipse.cdt.msvc.rc.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.link.dll.debug.1593127116" name="Linker (link)" superClass="org.eclipse.cdt.msvc.link.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.link.inputType.543187096" superClass="org.eclipse.cdt.msvc.link.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.lib.322957058" name="Library Manager (lib)" superClass="org.eclipse.cdt.msvc.lib"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -33,10 +56,21 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="dbapass.null.531308195" name="dbapass"/>
+		<project id="OraPassGen.null.67211021" name="OraPassGen"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/OraPassGen"/>
+		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692;org.eclipse.cdt.msvc.toolchain.dll.debug.240310692.53846283;org.eclipse.cdt.msvc.cl.c.dll.debug.1788493175;org.eclipse.cdt.msvc.cl.inputType.c.1122182216">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.msw.build.clScannerInfo"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.msvc.toolchain.dll.debug.240310692;org.eclipse.cdt.msvc.toolchain.dll.debug.240310692.53846283;org.eclipse.cdt.msvc.cl.dll.debug.1618398612;org.eclipse.cdt.msvc.cl.inputType.997663042">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.msw.build.clScannerInfo"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>

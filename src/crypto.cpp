@@ -26,7 +26,7 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
 	BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
 	if (verbose_flag)
-		printf("m %s\n", a_o_char = BN_bn2hex(a_bn));
+		printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
 
 	// use dbid as exponent "p" number
 	BIGNUM *p_bn = BN_new();
