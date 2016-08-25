@@ -44,7 +44,10 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	BIGNUM *r_bn = BN_new();
 	rc = BN_mod_exp(r_bn, a_bn, p_bn, n_bn, ctx);
 	if (verbose_flag)
+	{
 		printf("r %s\n", r_o_char = BN_bn2dec(r_bn));
+		OPENSSL_free(r_o_char);	
+	}
 
 	// compute sha(r)
 	int r_len = BN_num_bytes(r_bn);
@@ -54,7 +57,7 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	SHA224(r_m_bin, r_len, r_sha);
 
 	size_t r2_m_char_len = 4 * (SHA224_DIGEST_LENGTH / 3) + (SHA224_DIGEST_LENGTH % 3 != 0 ? 4 : 0);
-	char *r2_m_char = (char*)calloc(1, r2_m_char_len);
+	char *r2_m_char;
 	size_t r2_len;
 	// base64 encode sha224(r)
 	r2_m_char = base64_encode(r_sha, SHA224_DIGEST_LENGTH, &r2_len);
@@ -93,13 +96,12 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 
 	free(r2_m_char);
 	free(r_m_bin);
-	OPENSSL_free(r_o_char);	
 	OPENSSL_free(n_o_char);
 	OPENSSL_free(p_o_char);
 	OPENSSL_free(a_o_char);
-
 	BN_free(r_bn);
 	BN_free(a_bn);
 	BN_free(n_bn);
+	BN_free(p_bn);
 	return retval;
 }
