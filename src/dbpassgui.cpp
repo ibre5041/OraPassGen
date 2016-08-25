@@ -202,6 +202,7 @@ void DbPassGui::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void DbPassGui::generatePressed()
 {
+	qApp->setOverrideCursor(Qt::WaitCursor);
 	QString dbid = dbidEdit->text();
 	QString pass = passphraseEdit->text();
 	std::string utf8_dbid = dbid.toStdString();
@@ -212,6 +213,7 @@ void DbPassGui::generatePressed()
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());
 	generatedPasswordEdit->setText(gen.c_str());
+	qApp->restoreOverrideCursor();
 }
 
 void DbPassGui::createActions()
