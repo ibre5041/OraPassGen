@@ -49,6 +49,20 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 		OPENSSL_free(r_o_char);	
 	}
 
+ 	// just burn some CPU time
+	// compute r = a ^ r mod n
+	BIGNUM *r1_bn = BN_new();
+	for (int i=0; i<100; i++)
+	{
+		BN_copy(r1_bn, r_bn);
+		rc = BN_mod_exp(r_bn, a_bn, r1_bn, n_bn, ctx);
+	}
+	if (verbose_flag)
+	{
+		printf("r1 %s\n", r_o_char = BN_bn2dec(r_bn));
+		OPENSSL_free(r_o_char);	
+	}
+
 	// compute sha(r)
 	int r_len = BN_num_bytes(r_bn);
 	unsigned char* r_m_bin = (unsigned char*)calloc(1, r_len);
