@@ -34,6 +34,7 @@ static void usage()
 		"Usage:                                \n"
 		"  --dbid        <numeric database id> \n"
 		"  --passphrase  <passphrase>          \n"
+        "  --only-password                     \n"
 		"  --verbose                           \n"
 		"                                      \n"
 		);
@@ -48,6 +49,7 @@ extern "C" {
 int main(int argc, char *argv[])
 {
 	std::string passphrase, dbid;
+	bool only_password(false);
 	unsigned passphrase_length;
 
 	while (1)
@@ -59,12 +61,13 @@ int main(int argc, char *argv[])
 			   We distinguish them by their indices. */
 			{"dbid",       required_argument, 0, 'I'},
 			{"passphrase", required_argument, 0, 'P'},
-			{ "help",      no_argument,       0, 'h' },
+			{"only-password", no_argument,    0, 'o'},
+			{ "help",      no_argument,       0, 'h'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "hI:P:", long_options, &option_index);
+		int c = getopt_long (argc, argv, "ohI:P:", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -90,6 +93,9 @@ int main(int argc, char *argv[])
 				}
 			}
 			break;
+		case 'o':
+		    only_password = true;
+		    break;
 		case 'h':
 			usage();
 			return 0;
@@ -202,7 +208,12 @@ int main(int argc, char *argv[])
 
 	std::string gen_password = genpasswd(dbid, passphrase, n_str);
 	
-	std::cout << std::endl
-		  << " " << "alter user sys identified by \"" << gen_password << "\";" << std::endl
-		  << std::endl;		
+	if (only_password)
+	{
+	    std::cout << gen_password << std::endl;
+	} else {
+	    std::cout << std::endl
+	            << " " << "alter user sys identified by \"" << gen_password << "\";" << std::endl
+	            << std::endl;
+	}
 }
