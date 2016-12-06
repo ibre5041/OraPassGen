@@ -44,6 +44,8 @@ private slots:
 
 	void showConfigDialog();
 	void refreshConfig(QString filename);
+
+	void usernames(QStringList);
 private:
 	void createActions();
 	void createTrayIcon();

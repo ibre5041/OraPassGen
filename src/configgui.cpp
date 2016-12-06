@@ -18,6 +18,8 @@ ConfigGui::ConfigGui(QWidget * parent, Qt::WindowFlags f)
 	: QDialog(parent, f)
 	, defaultConfigDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
 	, httpRequestAborted(false)
+    , reply(NULL)
+    , file(NULL)
 {
 	setupUi(this);
 
@@ -33,6 +35,9 @@ ConfigGui::ConfigGui(QWidget * parent, Qt::WindowFlags f)
 	QObject::connect(buttonBox, SIGNAL(rejected()), this, SLOT(hide()));
 
 	settings.beginGroup("DbPassGui");
+	QString usernames = settings.value("usernames").toString();
+	usernamesTextEdit->setPlainText(usernames.split(',').join("\r\n"));
+
 	configFilePath = settings.value("filepath").toString();
 	configURLPath = settings.value("urlpath").toString();
 	settings.endGroup();
@@ -251,6 +256,16 @@ void ConfigGui::apply()
 		settings.setValue("filepath", fileLineEdit->text());
 		emit newServerList(file.absoluteFilePath());
 	}
+
+    QString usernames = usernamesTextEdit->toPlainText();
+    usernames.replace("\t", "");
+    usernames.replace(" ", "");
+    QStringList lines = usernames.split(QRegExp("\n|\r\n|\r"));
+    settings.setValue("usernames", lines.join(','));
+	QString l = lines.join(',');
+	emit newUsernames(lines);
+
 	settings.endGroup();
+	settings.sync();
 	hide();
 }

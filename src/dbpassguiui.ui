@@ -25,7 +25,7 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <item row="0" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="hostnameLabel">
        <property name="maximumSize">
         <size>
@@ -38,7 +38,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="3" column="0">
       <widget class="CompleteLineEdit" name="hostnameEdit">
        <property name="maximumSize">
         <size>
@@ -60,7 +60,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="sidLabel">
        <property name="maximumSize">
         <size>
@@ -73,7 +73,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="5" column="0">
       <widget class="CompleteLineEdit" name="sidEdit">
        <property name="maximumSize">
         <size>
@@ -95,7 +95,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="dbidLabel">
        <property name="maximumSize">
         <size>
@@ -108,7 +108,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="7" column="0">
       <widget class="QLineEdit" name="dbidEdit">
        <property name="maximumSize">
         <size>
@@ -129,6 +129,16 @@
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="usernameLabel">
+       <property name="text">
+        <string>Username:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="CompleteLineEdit" name="usernameEdit"/>
      </item>
     </layout>
    </item>

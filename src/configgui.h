@@ -38,6 +38,7 @@ private slots:
 	void apply();
 signals:
 	void newServerList(QString);
+	void newUsernames(QStringList);
 
 private:
 	QSettings settings;

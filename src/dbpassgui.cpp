@@ -84,6 +84,9 @@ DbPassGui::DbPassGui(QWidget * parent)
 		"border-radius: 2px;}");
 
 	settings.beginGroup("DbPassGui");
+	QString usernamesList = settings.value("usernames").toString();
+	usernames(usernamesList.split(','));
+
 	restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
 	showPassphraseCheckbox->setCheckState(settings.value("CheckBoxAState").toBool() ? Qt::Checked : Qt::Unchecked);
 	showGeneratedPasswordCheckbox->setCheckState(settings.value("CheckBoxBState").toBool() ? Qt::Checked : Qt::Unchecked);
@@ -240,6 +243,7 @@ void DbPassGui::createActions()
 	connect(sidEdit, SIGNAL(textChanged(const QString&)), this, SLOT(sidCleared(const QString&)));
 
 	connect(config, SIGNAL(newServerList(QString)), this, SLOT(refreshConfig(QString)));
+	connect(config, SIGNAL(newUsernames(QStringList)), this, SLOT(usernames(QStringList)));
 	flipCheckBoxA(showPassphraseCheckbox->checkState());
 	flipCheckBoxB(showGeneratedPasswordCheckbox->checkState());
 }
@@ -363,6 +367,15 @@ void DbPassGui::showConfigDialog()
 void DbPassGui::refreshConfig(QString filename)
 {
 	loadSeversFromFile(filename);
+}
+
+void DbPassGui::usernames(QStringList usernames)
+{
+    if (!usernames.empty())
+    {
+        usernameEdit->setText(usernames.first());
+    }
+    usernameEdit->setWords(usernames);
 }
 
 void DbPassGui::loadSeversFromFile(QString filename)
