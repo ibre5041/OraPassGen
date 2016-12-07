@@ -18,6 +18,7 @@ using namespace trotl;
 #endif
 
 #include <string>
+#include <vector>
 #include <ostream>
 #include <iostream>
 
@@ -33,6 +34,7 @@ static void usage()
 		"                                      \n"
 		"Usage:                                \n"
 		"  --dbid        <numeric database id> \n"
+		"  --username    <username,username>   \n"
 		"  --passphrase  <passphrase>          \n"
         "  --only-password                     \n"
 		"  --verbose                           \n"
@@ -48,7 +50,8 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-	std::string passphrase, dbid;
+	string passphrase, dbid;
+	vector<string> usernames;
 	bool only_password(false);
 	unsigned passphrase_length;
 
@@ -60,6 +63,7 @@ int main(int argc, char *argv[])
 			/* These options don’t set a flag.
 			   We distinguish them by their indices. */
 			{"dbid",       required_argument, 0, 'I'},
+			{"username",   required_argument, 0, 'u' },
 			{"passphrase", required_argument, 0, 'P'},
 			{"only-password", no_argument,    0, 'o'},
 			{ "help",      no_argument,       0, 'h'},
@@ -67,7 +71,7 @@ int main(int argc, char *argv[])
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "ohI:P:", long_options, &option_index);
+		int c = getopt_long (argc, argv, "ohI:P:u:", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -82,6 +86,12 @@ int main(int argc, char *argv[])
 			break;
 		case 'I':
 			dbid = optarg;
+			break;
+		case 'u':
+			{
+				string u = optarg;
+				usernames = split(u, ',');
+			}
 			break;
 		case 'P':
 			passphrase = optarg;
@@ -206,14 +216,40 @@ int main(int argc, char *argv[])
 		BN_free(n);
 	}
 
-	std::string gen_password = genpasswd(dbid, passphrase, n_str);
-	
-	if (only_password)
+	if (usernames.empty())
 	{
-	    std::cout << gen_password << std::endl;
-	} else {
-	    std::cout << std::endl
-	            << " " << "alter user sys identified by \"" << gen_password << "\";" << std::endl
-	            << std::endl;
+		usernames.push_back("SYS");
+		usernames.push_back("SYSTEM");
+
+		//usernames.push_back("ANONYMOUS");
+		//usernames.push_back("APPQOSSYS");
+		//usernames.push_back("AUDSYS");
+		//usernames.push_back("DBSNMP");
+		//usernames.push_back("DIP");
+		//usernames.push_back("GSMADMIN_INTERNAL");
+		//usernames.push_back("GSMCATUSER");
+		//usernames.push_back("GSMUSER");
+		//usernames.push_back("OJVMSYS");
+		//usernames.push_back("OUTLN");
+		//usernames.push_back("SYSBACKUP");
+		//usernames.push_back("SYSDG");
+		//usernames.push_back("SYSKM");
+		//usernames.push_back("WMSYS");
+		//usernames.push_back("XDB");
+	}
+
+	for (vector<string>::iterator it = usernames.begin(); it != usernames.end(); ++it)
+	{
+		std::string gen_password = genpasswd(dbid, *it, passphrase, n_str);
+
+		if (only_password)
+		{
+			std::cout << gen_password << std::endl;
+		}
+		else {
+			std::cout << std::endl
+				<< " " << "alter user " << *it << " identified by \"" << gen_password << "\";" << std::endl
+				<< std::endl;
+		}
 	}
 }

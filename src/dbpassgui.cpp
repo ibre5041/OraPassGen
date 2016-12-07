@@ -206,12 +206,14 @@ void DbPassGui::iconActivated(QSystemTrayIcon::ActivationReason reason)
 void DbPassGui::generatePressed()
 {
 	qApp->setOverrideCursor(Qt::WaitCursor);
+	QString user = usernameEdit->text();
 	QString dbid = dbidEdit->text();
 	QString pass = passphraseEdit->text();
+	std::string utf8_user = user.toStdString();
 	std::string utf8_dbid = dbid.toStdString();
 	std::string utf8_pass = pass.toStdString();
 	std::string utf8_n    = n.toStdString();
-	std::string gen = genpasswd(utf8_dbid, utf8_pass, utf8_n);
+	std::string gen = genpasswd(utf8_dbid, utf8_user, utf8_pass, utf8_n);
 
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());

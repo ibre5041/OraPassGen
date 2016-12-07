@@ -9,16 +9,20 @@
 #include <openssl/buffer.h>
 
 #include <iostream>
+#include <algorithm>
 
 #include <string.h>
 
 using namespace std;
 
-string genpasswd(string const& dbid, string const& passphrase, string const& n_str)
+string genpasswd(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
 {
+	string username(_username);
+	transform(username.begin(), username.end(), username.begin(), ::toupper);
+
 	static BN_CTX *ctx = BN_CTX_new();
 	string retval;
-	char *a_o_char(0), *p_o_char(0), *n_o_char(0), *r_o_char(0);
+	char *a_o_char(0), *p_o_char(0), *n_o_char(0), *r_o_char(0), *u_o_char(0);
 	int rc;
 
 	// use password hash as number "a"
@@ -49,9 +53,22 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 		OPENSSL_free(r_o_char);	
 	}
 
+	BIGNUM *r1_bn = BN_new();
+
+	// use username hash as number "u"
+	// different password for each user
+	unsigned char u_md5[MD5_DIGEST_LENGTH];
+	MD5((unsigned char*)username.c_str(), username.size(), u_md5);
+	BIGNUM *u_bn = BN_bin2bn(u_md5, MD5_DIGEST_LENGTH, NULL);
+	if (verbose_flag)
+		printf("u %s\n", u_o_char = BN_bn2hex(u_bn));
+	{
+		BN_copy(r1_bn, r_bn);
+		rc = BN_mod_exp(r_bn, r1_bn, u_bn, n_bn, ctx);
+	}
+
  	// just burn some CPU time
 	// compute r = a ^ r mod n
-	BIGNUM *r1_bn = BN_new();
 	for (int i=0; i<100; i++)
 	{
 		BN_copy(r1_bn, r_bn);
@@ -104,7 +121,7 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	}
 
 	if (verbose_flag)
-		printf("r2 %s %d\n", r2_m_char, strnlen(r2_m_char, r2_m_char_len));
+		printf("r2 %s %zd\n", r2_m_char, strnlen(r2_m_char, r2_m_char_len));
 
 	retval = r2_m_char;
 
@@ -113,9 +130,11 @@ string genpasswd(string const& dbid, string const& passphrase, string const& n_s
 	OPENSSL_free(n_o_char);
 	OPENSSL_free(p_o_char);
 	OPENSSL_free(a_o_char);
+	OPENSSL_free(u_o_char);
 	BN_free(r_bn);
 	BN_free(a_bn);
 	BN_free(n_bn);
 	BN_free(p_bn);
+	BN_free(u_bn);
 	return retval;
 }
