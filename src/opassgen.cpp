@@ -21,6 +21,7 @@ using namespace trotl;
 #include <vector>
 #include <ostream>
 #include <iostream>
+#include <iomanip>
 
 #include "common.h"
 #include "crypto.h"
@@ -247,9 +248,8 @@ int main(int argc, char *argv[])
 			std::cout << gen_password << std::endl;
 		}
 		else {
-			std::cout << std::endl
-				<< " " << "alter user " << *it << " identified by \"" << gen_password << "\";" << std::endl
-				<< std::endl;
+			// Max username length is 30 CHARs
+			std::cout << " " << "alter user " << std::left << std::setw(30) << *it <<" identified by \"" << gen_password << "\";" << std::endl;
 		}
 	}
 }
