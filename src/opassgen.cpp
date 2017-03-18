@@ -1,3 +1,4 @@
+
 #include <openssl/bn.h>
 #include <openssl/md5.h>
 #include <openssl/bio.h>
@@ -37,8 +38,9 @@ static void usage()
 		"  --dbid        <numeric database id> \n"
 		"  --username    <username,username>   \n"
 		"  --passphrase  <passphrase>          \n"
-        "  --only-password                     \n"
+		"  --only-password                     \n"
 		"  --verbose                           \n"
+		"  --version                           \n"		
 		"                                      \n"
 		);
 }
@@ -68,6 +70,7 @@ int main(int argc, char *argv[])
 			{"passphrase", required_argument, 0, 'P'},
 			{"only-password", no_argument,    0, 'o'},
 			{ "help",      no_argument,       0, 'h'},
+			{ "version",   no_argument,       0, 'v'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
@@ -113,6 +116,9 @@ int main(int argc, char *argv[])
 		case '?':
 			/* getopt_long already printed an error message. */
 			break;
+		case 'v':
+			printf(version_string().c_str());
+			return 0;
 		default:
 			abort ();
 		}

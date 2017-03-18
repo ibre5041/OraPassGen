@@ -1,6 +1,8 @@
 #include "common.h"
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 int verbose_flag = false;
 
@@ -9,6 +11,12 @@ int verbose_flag = false;
 #include <conio.h>
 #include <io.h>
 //#include <unistd.h>
+
+#if defined(HAVE_GITREVISION_H)
+# include "gitrevision.h"
+#else
+# include "version.h"
+#endif
 
 std::string exec(std::string cmd) {
 	FILE * pipe = _popen(cmd.c_str(), "r");
@@ -214,4 +222,25 @@ char *base64_encode(const unsigned char *data,
 		encoded_data[*output_length - 1 - i] = '=';
 
 	return encoded_data;
+}
+
+std::string version_string()
+{
+	using namespace std;
+	stringstream  version;
+#if defined(HAVE_GITREVISION_H)
+	version << left << setw(18) << "GITVERSION:" <<GITVERSION             << endl;
+	version << left << setw(18) << "GITVERSION_MAJOR:" <<GITVERSION_MAJOR << endl;
+	version << left << setw(18) << "GITVERSION_MINOR:" <<GITVERSION_MINOR << endl;
+	version << left << setw(18) << "GIT_BUILD_TYPE:" <<GIT_BUILD_TYPE     << endl;
+	version << left << setw(18) << "GITVERSION_COUNT:" <<GITVERSION_COUNT << endl;
+	version << left << setw(18) << "GITVERSION_SHA1:" <<GITVERSION_SHA1   << endl;
+	version << left << setw(18) << "GITVERSION_SHORT:" <<GITVERSION_SHORT << endl;
+	version << left << setw(18) << "GIT_BRANCH:" <<GIT_BRANCH             << endl;
+	version << left << setw(18) << "BUILD_TAG:" <<BUILD_TAG               << endl;
+	version << left << setw(18) << "BUILD_DATE:" <<BUILD_DATE             << endl;
+#else
+	version << "0.9" << endl;
+#endif
+	return version.str();
 }

@@ -80,6 +80,7 @@ ELSE (MSVC)
 ENDIF (MSVC)
 
 INCLUDE_DIRECTORIES(
+	${CMAKE_SOURCE_DIR}
 	src/trotl/src
 	src/trotl
 	src/loki/include
@@ -92,6 +93,36 @@ INCLUDE_DIRECTORIES(
 SET(TROTL_DLL_DEFINES    -DLOKI_STATIC -DEXPLICIT_EXPORT -DTROTL_MAKE_DLL)
 SET(TROTL_CLIENT_DEFINES -DLOKI_STATIC -DEXPLICIT_EXPORT -DTROTL_DLL)
 
-#ADD_SUBDIRECTORY (extlibs)
+FIND_PACKAGE(Git)
+IF(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+  # a custom target that is always built
+  ADD_CUSTOM_TARGET(revisiontag ALL)
+  # creates gitrevision.h using cmake script
+  ADD_CUSTOM_COMMAND(TARGET revisiontag COMMAND ${CMAKE_COMMAND}
+  -DUSE_EXPERIMENTAL=${USE_EXPERIMENTAL}
+  -DTARGET_NAME=revisiontag
+  -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/getgit.cmake
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  )
+  add_definitions("-DHAVE_GITREVISION_H=1")
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/getgit.cmake)
+  set (VERSION ${GITVERSION_SHORT})
+ELSE()
+  #Set our version values (if not determined from git tag)
+  SET (VERSION_MAJOR "0")
+  SET (VERSION_MINOR "9")
+  #SET (VERSION_PATCH "0")
+  #SET (VERSION_SUFFIX "")
+  #SET (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX})
+  SET (VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+  if(EXISTS {CMAKE_CURRENT_SOURCE_DIR}/gitrevision.h)
+    add_definitions("-DHAVE_GITREVISION_H=1")
+  else()
+    file(WRITE  ${CMAKE_BINARY_DIR}/toversion.h "#pragma once\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/toversion.h "#define OPG_VERSION \"${VERSION}\"\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/toversion.h "#define OPG_BUILDTYPE_RELEASE \"Release\"\n")
+  endif()
+ENDIF()
+
 ADD_SUBDIRECTORY (src)
 
