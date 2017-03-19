@@ -30,5 +30,10 @@ DBPASS.sln
 **/*.a
 **/*.o
 
+LastVersion.txt
+gitrevision.bat
+gitrevision.h
+n.txt
 
+				
 									
