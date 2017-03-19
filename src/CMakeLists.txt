@@ -15,7 +15,7 @@ ENDIF(WIN32)
 
 SET(dbpassgui_ui_src dbpassguiui.ui configui.ui)
 
-SET(common_sources common.cpp crypto.cpp)
+SET(common_sources common.cpp crypto.cpp md5.cpp sha224.cpp)
 if(WIN32)
    LIST (APPEND common_sources win32/getopt_long.cpp)
 include_directories(win32)

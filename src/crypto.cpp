@@ -8,6 +8,12 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "md5.h"
+#include "sha224.h"
+
+#include <vector>
 #include <iostream>
 #include <algorithm>
 
@@ -30,7 +36,11 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 	MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
 	BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
 	if (verbose_flag)
+	{
 		printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
+		printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
+	}
+
 
 	// use dbid as exponent "p" number
 	BIGNUM *p_bn = BN_new();
@@ -53,15 +63,18 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 		OPENSSL_free(r_o_char);	
 	}
 
-	BIGNUM *r1_bn = BN_new();
-
 	// use username hash as number "u"
 	// different password for each user
 	unsigned char u_md5[MD5_DIGEST_LENGTH];
 	MD5((unsigned char*)username.c_str(), username.size(), u_md5);
 	BIGNUM *u_bn = BN_bin2bn(u_md5, MD5_DIGEST_LENGTH, NULL);
 	if (verbose_flag)
+	{
 		printf("u %s\n", u_o_char = BN_bn2hex(u_bn));
+		printf("u %s\n", u_o_char = BN_bn2dec(u_bn));
+	}
+
+	BIGNUM *r1_bn = BN_new();
 	{
 		BN_copy(r1_bn, r_bn);
 		rc = BN_mod_exp(r_bn, r1_bn, u_bn, n_bn, ctx);
@@ -76,8 +89,10 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 	}
 	if (verbose_flag)
 	{
-		printf("r1 %s\n", r_o_char = BN_bn2dec(r_bn));
-		OPENSSL_free(r_o_char);	
+	    printf("r %s\n", r_o_char = BN_bn2dec(r_bn));
+	    OPENSSL_free(r_o_char);
+	    printf("r1 %s\n", r_o_char = BN_bn2dec(r1_bn));
+	    OPENSSL_free(r_o_char);
 	}
 
 	// compute sha(r)
@@ -138,3 +153,113 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 	BN_free(u_bn);
 	return retval;
 }
+
+#ifdef USE_BOOT_MULTI
+// boost::multiprecision implementation
+// easier to read. but implementation is MUCH SLOWER than openssl big_num
+//
+string genpasswd2(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
+{
+    string retval;
+
+    string username(_username);
+    transform(username.begin(), username.end(), username.begin(), ::toupper);
+
+    Crypto::MD5 A_MD5(passphrase);
+    boost::multiprecision::cpp_int A;
+    {
+        std::vector<unsigned char> v;
+        for(unsigned i=0; i < 16; ++i)
+        {
+            v.push_back(A_MD5.bindigest()[i]);
+        }
+        boost::multiprecision::import_bits(A, v.begin(), v.end());
+    }
+    std::cout << "A " << A_MD5.hexdigest() << std::endl;
+    std::cout << "A " << A << std::endl;
+
+
+    // use dbid as exponent "p" number
+    boost::multiprecision::cpp_int P(dbid);
+    std::cout << "P " << P << std::endl;
+
+    // convert n_str into n number
+    boost::multiprecision::cpp_int N(n_str);
+    std::cout << "N " << N << std::endl;
+
+    // compute r = a ^ p mod n
+    boost::multiprecision::cpp_int R = powm(A, P, N);
+    std::cout << "R " << R << std::endl;
+
+
+    // use username hash as number "u"
+    // different password for each user
+    Crypto::MD5 U_MD5(username);
+    boost::multiprecision::cpp_int U;
+    {
+        std::vector<unsigned char> v;
+        for (unsigned i = 0; i < 16; ++i)
+        {
+            v.push_back(U_MD5.bindigest()[i]);
+        }
+        boost::multiprecision::import_bits(U, v.begin(), v.end());
+    }
+    std::cout << "U " << U_MD5.hexdigest() << std::endl;
+    std::cout << "U " << U << std::endl;
+
+    boost::multiprecision::cpp_int R1 = R;
+    R = powm(R1, U, N);
+
+    // just burn some CPU time
+    // compute r = a ^ r mod n
+    for (int i=0; i<100; i++)
+    {
+        R1 = R;
+        R = powm(A, R1, N);
+    }
+    std::cout << "R " << R << std::endl;
+    std::cout << "R1 " << R1 << std::endl;
+
+    // compute sha(r)
+    std::string v;
+    boost::multiprecision::export_bits(R, std::back_inserter(v), 8);
+    Crypto::SHA224 R2_SHA224(v);
+    std::string R2_bin((const char*)R2_SHA224.bindigest());
+
+    size_t r2_len;
+    char *r2_m_char = base64_encode((const unsigned char *)R2_bin.c_str(), SHA224_DIGEST_LENGTH, &r2_len);
+    r2_m_char[GENPW] = 0; // truncate to max password len
+
+    {
+        for (size_t i=0; i < GENPW; i++)
+            if ( r2_m_char[i] == '/' || r2_m_char[i] == '+')
+                r2_m_char[i] = '_'; // comply with Oracle password allowed chars
+
+        // 1st character of password must be uppercase alpha not a digit
+        if (r2_m_char[0] == '_')
+            r2_m_char[0] = 'A';
+        if (isdigit(r2_m_char[0]))
+            r2_m_char[0] = 'A' + (r2_m_char[0] - '0');
+        if (isalpha(r2_m_char[0]) && islower(r2_m_char[0]))
+            r2_m_char[0] = 'A' + (r2_m_char[0] - 'a');
+
+        // 2st character of password must be lowercase alpha
+        if (r2_m_char[1] == '_')
+            r2_m_char[1] = 'a';
+        if (isdigit(r2_m_char[1]))
+            r2_m_char[1] = 'a' + (r2_m_char[1] - '0');
+        if (isalpha(r2_m_char[1]) && isupper(r2_m_char[1]))
+            r2_m_char[1] = 'a' + (r2_m_char[1] - 'A');
+
+        // 3rd character of password must be digit
+        if (!isdigit(r2_m_char[2]))
+            r2_m_char[2] = '0';
+    }
+
+
+    std::cout << "r2 " << r2_m_char << std::endl;
+
+    retval = r2_m_char;
+    return retval;
+}
+#endif
