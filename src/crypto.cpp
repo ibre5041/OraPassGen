@@ -21,7 +21,8 @@
 
 using namespace std;
 
-string genpasswd(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
+#ifdef USE_OPENSSL
+string genpasswd_openssl(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
 {
 	string username(_username);
 	transform(username.begin(), username.end(), username.begin(), ::toupper);
@@ -102,6 +103,11 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 	unsigned char r_sha[SHA224_DIGEST_LENGTH];
 	SHA224(r_m_bin, r_len, r_sha);
 
+	if (verbose_flag)
+	{
+           printf("r_len %d\n", r_len);
+	}
+
 	size_t r2_m_char_len = 4 * (SHA224_DIGEST_LENGTH / 3) + (SHA224_DIGEST_LENGTH % 3 != 0 ? 4 : 0);
 	char *r2_m_char;
 	size_t r2_len;
@@ -153,12 +159,13 @@ string genpasswd(string const& dbid, string const& _username, string const& pass
 	BN_free(u_bn);
 	return retval;
 }
+#endif
 
-#ifdef USE_BOOT_MULTI
+#ifdef USE_BOOST_MULTIPRECISION
 // boost::multiprecision implementation
 // easier to read. but implementation is MUCH SLOWER than openssl big_num
 //
-string genpasswd2(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
+string genpasswd_boost(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
 {
     string retval;
 
@@ -262,4 +269,121 @@ string genpasswd2(string const& dbid, string const& _username, string const& pas
     retval = r2_m_char;
     return retval;
 }
+#endif
+
+#if 1
+#include <mpirxx.h>
+#include <mpir.h>
+string genpasswd_mpir(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
+{
+	string retval;
+
+	string username(_username);
+	transform(username.begin(), username.end(), username.begin(), ::toupper);
+
+	Crypto::MD5 A_MD5(passphrase);
+	mpz_t a;
+	mpz_init(a);
+	mpz_import (a, 16, 1, 1, 0, 0, A_MD5.bindigest());
+	mpz_class A(a);
+	if (verbose_flag)
+	{
+		std::cout << "A " << A_MD5.hexdigest() << std::endl;	
+		std::cout << "A " << A << std::endl;
+	}
+
+	// use dbid as exponent "p" number
+	mpz_class P(dbid);
+	if (verbose_flag)
+		std::cout << "P " << P << std::endl;
+
+	// convert n_str into n number
+	mpz_class N(n_str);
+	if (verbose_flag)
+		std::cout << "N " << N << std::endl;
+
+	// compute r = a ^ p mod n
+	mpz_class R(0);
+	mpz_powm(R.get_mpz_t(), A.get_mpz_t(), P.get_mpz_t(), N.get_mpz_t());
+	if (verbose_flag)
+		std::cout << "R " << R << std::endl;
+
+	// use username hash as number "u"
+	// different password for each user
+	Crypto::MD5 U_MD5(username);
+	mpz_t u;
+	mpz_init(u);
+	mpz_import (u, 16, 1, 1, 0, 0, U_MD5.bindigest());
+	mpz_class U(u);
+	if (verbose_flag)
+	{
+		std::cout << "U " << U_MD5.hexdigest() << std::endl;
+		std::cout << "U " << U << std::endl;
+	}
+
+	mpz_class R1 = R;
+	mpz_powm(R.get_mpz_t(), R1.get_mpz_t(), U.get_mpz_t(), N.get_mpz_t());
+
+	// just burn some CPU time
+	// compute r = a ^ r mod n
+	for (int i=0; i<100; i++)
+	{
+		R1 = R;
+		mpz_powm(R.get_mpz_t(), A.get_mpz_t(), R1.get_mpz_t(), N.get_mpz_t());
+	}
+	if (verbose_flag)
+	{
+		std::cout << "R " << R << std::endl;
+		std::cout << "R1 " << R1 << std::endl;
+	}
+
+	// compute sha(r)
+	size_t size = (mpz_sizeinbase (R.get_mpz_t(), 2) + CHAR_BIT-1) / CHAR_BIT;
+	char *buff = (char*)calloc(1, size);
+	mpz_export(buff, &size, 1, 1, 0, 0, R.get_mpz_t());
+	if (verbose_flag)
+		std::cout << "R_LEN " << size << std::endl;
+
+	std::string v(buff, size);
+	Crypto::SHA224 R2_SHA224(v);
+	std::string R2_bin((const char*)R2_SHA224.bindigest());
+
+	size_t r2_len;
+	char *r2_m_char = base64_encode((const unsigned char *)R2_bin.c_str(), SHA224_DIGEST_LENGTH, &r2_len);
+	r2_m_char[GENPW] = 0; // truncate to max password len
+
+	{
+		for (size_t i=0; i < GENPW; i++)
+			if ( r2_m_char[i] == '/' || r2_m_char[i] == '+')
+				r2_m_char[i] = '_'; // comply with Oracle password allowed chars
+
+		// 1st character of password must be uppercase alpha not a digit
+		if (r2_m_char[0] == '_')
+			r2_m_char[0] = 'A';
+		if (isdigit(r2_m_char[0]))
+			r2_m_char[0] = 'A' + (r2_m_char[0] - '0');
+		if (isalpha(r2_m_char[0]) && islower(r2_m_char[0]))
+			r2_m_char[0] = 'A' + (r2_m_char[0] - 'a');
+
+		// 2st character of password must be lowercase alpha
+		if (r2_m_char[1] == '_')
+			r2_m_char[1] = 'a';
+		if (isdigit(r2_m_char[1]))
+			r2_m_char[1] = 'a' + (r2_m_char[1] - '0');
+		if (isalpha(r2_m_char[1]) && isupper(r2_m_char[1]))
+			r2_m_char[1] = 'a' + (r2_m_char[1] - 'A');
+
+		// 3rd character of password must be digit
+		if (!isdigit(r2_m_char[2]))
+			r2_m_char[2] = '0';
+	}
+
+	if (verbose_flag)
+		std::cout << "r2 " << r2_m_char << std::endl;
+	
+	retval = r2_m_char;
+	
+	return retval;
+}
+
 #endif

@@ -45,6 +45,8 @@ ELSEIF(BUILD_STATIC)
      ${common_libs}
      ${ORACLE_STATIC_LIBRARIES}
      "-Wl,--whole-archive" trotl "-Wl,--no-whole-archive"
+     ${MPIRXX_LIBRARIES_STATIC}
+     ${MPIR_LIBRARIES_STATIC}
      pthread dl)
 ELSE()
    # cmake 3.0 (not present on RHEL)

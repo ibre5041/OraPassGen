@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 
 	for (vector<string>::iterator it = usernames.begin(); it != usernames.end(); ++it)
 	{
-		std::string gen_password = genpasswd(dbid, *it, passphrase, n_str);
+		std::string gen_password = GENPASSWD(dbid, *it, passphrase, n_str);
 
 		if (only_password)
 		{
