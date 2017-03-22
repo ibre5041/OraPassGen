@@ -12,12 +12,6 @@ int verbose_flag = false;
 #include <io.h>
 //#include <unistd.h>
 
-#if defined(HAVE_GITREVISION_H)
-# include "gitrevision.h"
-#else
-# include "version.h"
-#endif
-
 std::string exec(std::string cmd) {
 	FILE * pipe = _popen(cmd.c_str(), "r");
 	if (!pipe) return "ERROR";
@@ -223,6 +217,12 @@ char *base64_encode(const unsigned char *data,
 
 	return encoded_data;
 }
+
+#if defined(HAVE_GITREVISION_H)
+# include "gitrevision.h"
+#else
+# include "version.h"
+#endif
 
 std::string version_string()
 {
