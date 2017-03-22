@@ -198,29 +198,20 @@ int main(int argc, char *argv[])
 	{ // 2n read n from file		
 		char *buffer;
 		long int buffer_len;
+
+		FILE* file = fopen(N_FILE_DEC, "r");
+		if (!file)
 		{
-			FILE* file = fopen(N_FILE_DEC, "r");
-			if (!file)
-			{
-				fprintf(stderr, "File not found: " N_FILE_DEC "\n");
-				return 3;
-			}
-			fseek(file, 0L, SEEK_END);
-			buffer_len = ftell(file);
-			buffer = (char*)malloc(buffer_len);
-			fseek(file, 0L, SEEK_SET);
-			size_t read = fread(buffer, buffer_len, 1, file);
-			fclose(file);
+			fprintf(stderr, "File not found: " N_FILE_DEC "\n");
+			return 3;
 		}
-		BIGNUM *n = BN_new();
-		int rc = BN_dec2bn(&n, buffer);
-		char *n_char = BN_bn2dec(n);
-		if (verbose_flag)
-			printf("n %s\n", n_char);
-		n_str = n_char;
-		free(buffer);
-		OPENSSL_free(n_char);
-		BN_free(n);
+		fseek(file, 0L, SEEK_END);
+		buffer_len = ftell(file);
+		buffer = (char*)malloc(buffer_len);
+		fseek(file, 0L, SEEK_SET);
+		size_t read = fread(buffer, buffer_len, 1, file);
+		fclose(file);
+		n_str = std::string(buffer, read);
 	}
 
 	if (usernames.empty())
