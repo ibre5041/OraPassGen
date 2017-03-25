@@ -14,6 +14,10 @@
 #include <QStandardPaths>
 #include <QUrl>
 
+#if defined(HAVE_GITREVISION_H)
+# include "gitrevision.h"
+#endif
+
 ConfigGui::ConfigGui(QWidget * parent, Qt::WindowFlags f)
 	: QDialog(parent, f)
 	, defaultConfigDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
@@ -55,6 +59,24 @@ ConfigGui::ConfigGui(QWidget * parent, Qt::WindowFlags f)
 	URLRadioButton->setChecked(url.isValid());
 	URLLineEdit->setEnabled(url.isValid());
 	updateButton->setEnabled(url.isValid());
+
+#if defined(HAVE_GITREVISION_H)
+    QString version;
+    version.append("<center><table>");
+    QString format = QString("<tr><td align=\"right\">%1:<td align=\"left\">%2");
+    version.append(format.arg("GITVERSION").arg(GITVERSION));
+    version.append(format.arg("GITVERSION_MAJOR").arg(GITVERSION_MAJOR));
+    version.append(format.arg("GITVERSION_MINOR").arg(GITVERSION_MINOR));
+    version.append(format.arg("GIT_BUILD_TYPE").arg(GIT_BUILD_TYPE));
+    version.append(format.arg("GITVERSION_COUNT").arg(GITVERSION_COUNT));
+    version.append(format.arg("GITVERSION_SHA1").arg(GITVERSION_SHA1));
+    version.append(format.arg("GITVERSION_SHORT").arg(GITVERSION_SHORT));
+    version.append(format.arg("GIT_BRANCH").arg(GIT_BRANCH));
+    version.append(format.arg("BUILD_TAG").arg(BUILD_TAG));
+    version.append(format.arg("BUILD_DATE").arg(BUILD_DATE));
+    version.append("</table>");
+    versionTextEdit->setHtml(version);
+#endif
 }
 
 void ConfigGui::showNormal()
