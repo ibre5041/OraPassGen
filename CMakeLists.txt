@@ -20,10 +20,21 @@ SET(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 #Set the custom CMake module directory where our include/lib finders are
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-FIND_PACKAGE(Boost 1.41.0 REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
+FIND_PACKAGE(Boost 1.60.0)
+FIND_PACKAGE(OpenSSL)
 FIND_PACKAGE(GMP)
 FIND_PACKAGE(Oracle COMPONENTS CLNTST)
+
+if(Boost_FOUND)
+  add_definitions(-DBOOST_FOUND)
+endif()
+if(OPENSSL_FOUND)
+  add_definitions(-DOPENSSL_FOUND)
+endif()
+if(GMP_FOUND)
+  add_definitions(-DGMP_FOUND)
+endif()
+
 message(STATUS "build gui ${BUILD_QT_GUI}")
 IF(BUILD_QT_GUI)
   message(STATUS "Looing for QT5")

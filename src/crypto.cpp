@@ -21,7 +21,7 @@
 
 using namespace std;
 
-#ifdef USE_OPENSSL
+#ifdef OPENSSL_FOUND
 string genpasswd_openssl(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
 {
 	string username(_username);
@@ -161,7 +161,7 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 }
 #endif
 
-#ifdef USE_BOOST_MULTIPRECISION
+#ifdef BOOST_FOUND
 // boost::multiprecision implementation
 // easier to read. but implementation is MUCH SLOWER than openssl big_num
 //
@@ -271,7 +271,8 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
 }
 #endif
 
-#if 1
+#ifdef GMP_FOUND
+
 #include <mpirxx.h>
 #include <mpir.h>
 string genpasswd_mpir(string const& dbid, string const& _username, string const& passphrase, string const& n_str)

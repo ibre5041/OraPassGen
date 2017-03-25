@@ -213,7 +213,7 @@ void DbPassGui::generatePressed()
 	std::string utf8_dbid = dbid.toStdString();
 	std::string utf8_pass = pass.toStdString();
 	std::string utf8_n    = n.toStdString();
-	std::string gen = genpasswd(utf8_dbid, utf8_user, utf8_pass, utf8_n);
+	std::string gen = GENPASSWD(utf8_dbid, utf8_user, utf8_pass, utf8_n);
 
 	QClipboard *p_Clipboard = QApplication::clipboard();
 	p_Clipboard->setText(gen.c_str());
