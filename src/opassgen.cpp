@@ -40,7 +40,9 @@ static void usage()
 		"  --passphrase  <passphrase>          \n"
 		"  --only-password                     \n"
 		"  --verbose                           \n"
-		"  --version                           \n"		
+		"  --apply                             \n"
+		"  --create-keyfile                    \n"
+		"  --version                           \n"
 		"                                      \n"
 		);
 }
@@ -56,7 +58,19 @@ int main(int argc, char *argv[])
 	string passphrase, dbid;
 	vector<string> usernames;
 	bool only_password(false);
-	unsigned passphrase_length;
+	bool apply(false);
+	bool create_keyfile(false);
+
+#ifdef _WIN32
+	char *p = strrchr(argv[0], '\\');
+#else
+	char *p = strrchr(argv[0], '/');
+#endif
+	if (p)
+	{
+	    p[0] = 0;
+	    chdir(argv[0]);
+	}
 
 	while (1)
 	{
@@ -69,13 +83,15 @@ int main(int argc, char *argv[])
 			{"username",   required_argument, 0, 'u' },
 			{"passphrase", required_argument, 0, 'P'},
 			{"only-password", no_argument,    0, 'o'},
+			{ "apply",     no_argument,       0, 'a' },
+			{ "create-keyfile", no_argument,  0, 'c' },
 			{ "help",      no_argument,       0, 'h'},
 			{ "version",   no_argument,       0, 'v'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "ohI:P:u:", long_options, &option_index);
+		int c = getopt_long (argc, argv, "oachI:P:u:", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -119,6 +135,12 @@ int main(int argc, char *argv[])
 		case 'v':
 			printf(version_string().c_str());
 			return 0;
+		case 'c':
+			create_keyfile = true;
+			break;
+		case 'a':
+			apply = true;
+			break;
 		default:
 			abort ();
 		}
@@ -126,29 +148,20 @@ int main(int argc, char *argv[])
 	if (verbose_flag)
 		puts ("verbose flag is set");
 
+	if (passphrase.empty() && !create_keyfile)
+	{
+		read_keyfile(passphrase);
+	}
+
 	if (passphrase.empty())
 	{
-		char pw1[MAXPW] = {0}, pw2[MAXPW] = {0};
-		char *p1 = pw1, *p2 = pw2;
-		ssize_t nchr = 0;
-		std::string passphrase2;
-		printf ( "\n Enter passphrase:  ");
-		nchr = getpasswd (&p1, MAXPW, '*', stdin);
-		printf ( "\n Retype passphrase: ");
-		nchr = getpasswd (&p2, MAXPW, '*', stdin);
-		printf("\n----------------------------\n");
-		if (verbose_flag) {
-			printf("\n you entered   : %s  (%zu chars)\n", p1, nchr);
-			printf("\n you entered   : %s  (%zu chars)\n", p2, nchr);
-		}
-		passphrase = pw1;
-		passphrase2 = pw2;
-		if (passphrase != passphrase2)
-		{
-			printf("passphrases do not match\n");
-			return 2;
-		}		
-		passphrase_length = nchr;
+		prompt_passphrase(passphrase);
+	}
+
+	if (create_keyfile)
+	{
+		write_keyfile(passphrase);
+		return 0;
 	}
 
 #if defined(__unix__) && defined(ORACLE_FOUND)
@@ -196,22 +209,7 @@ int main(int argc, char *argv[])
 #endif
 	if (n_str.empty())
 	{ // 2n read n from file		
-		char *buffer;
-		long int buffer_len;
-
-		FILE* file = fopen(N_FILE_DEC, "r");
-		if (!file)
-		{
-			fprintf(stderr, "File not found: " N_FILE_DEC "\n");
-			return 3;
-		}
-		fseek(file, 0L, SEEK_END);
-		buffer_len = ftell(file);
-		buffer = (char*)malloc(buffer_len);
-		fseek(file, 0L, SEEK_SET);
-		size_t read = fread(buffer, buffer_len, 1, file);
-		fclose(file);
-		n_str = std::string(buffer, read);
+	    n_str = slurp(N_FILE_DEC);
 	}
 
 	if (usernames.empty())

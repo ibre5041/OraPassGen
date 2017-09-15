@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 
 int verbose_flag = false;
@@ -243,4 +244,53 @@ std::string version_string()
 	version << "0.9" << endl;
 #endif
 	return version.str();
+}
+
+void prompt_passphrase(std::string &passphrase)
+{
+    char pw1[MAXPW] = {0}, pw2[MAXPW] = {0};
+    char *p1 = pw1, *p2 = pw2;
+    ssize_t nchr = 0;
+    std::string passphrase1, passphrase2;
+    printf ( "\n Enter passphrase:  ");
+    nchr = getpasswd (&p1, MAXPW, '*', stdin);
+    printf ( "\n Retype passphrase: ");
+    nchr = getpasswd (&p2, MAXPW, '*', stdin);
+    printf("\n----------------------------\n");
+    if (verbose_flag) {
+        printf("\n you entered   : %s  (%zu chars)\n", p1, nchr);
+        printf("\n you entered   : %s  (%zu chars)\n", p2, nchr);
+    }
+    passphrase1 = pw1;
+	passphrase2 = pw2;
+    if (passphrase1 != passphrase2)
+    {
+        printf("passphrases do not match\n");
+        exit(2);
+    }
+	passphrase = passphrase1;
+}
+
+std::string slurp(const char *filename)
+{
+    std::ifstream in(filename, std::ios::in | std::ios::binary);
+    if (in.is_open())
+    {
+        std::stringstream sstr;
+        sstr << in.rdbuf();
+        return sstr.str();
+    } else {
+        std::cerr << "File not found: " << N_FILE_DEC << std::endl;
+        exit(3);
+    }
+}
+
+void write_keyfile(std::string const &)
+{
+
+}
+
+void read_keyfile(std::string &)
+{
+
 }

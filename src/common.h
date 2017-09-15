@@ -25,3 +25,10 @@ char *base64_encode(const unsigned char *data, size_t input_length, size_t *outp
 extern int verbose_flag;
 
 std::string version_string();
+
+void prompt_passphrase(std::string &);
+
+std::string slurp(const char*);
+
+void write_keyfile(std::string const&);
+void read_keyfile(std::string &);

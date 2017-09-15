@@ -201,3 +201,10 @@ getopt_long(int argc, char *const argv[],
 	}
 	return optopt;
 }
+
+#include <Windows.h>
+
+int chdir(const char *path)
+{
+    return SetCurrentDirectory(path);
+}
