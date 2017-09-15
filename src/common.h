@@ -29,6 +29,3 @@ std::string version_string();
 void prompt_passphrase(std::string &);
 
 std::string slurp(const char*);
-
-void write_keyfile(std::string const&);
-void read_keyfile(std::string &);

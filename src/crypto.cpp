@@ -16,6 +16,8 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 #include <string.h>
 
@@ -34,14 +36,21 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 
 	// use password hash as number "a"
 	unsigned char a_md5[MD5_DIGEST_LENGTH];
-	MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
-	BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
-	if (verbose_flag)
+	BIGNUM *a_bn(0);
+	if (passphrase.size() != MD5_DIGEST_LENGTH*2)
 	{
-		printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
-		printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
+	    // usual way passphrase passed from users input
+	    MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
+	    a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
+	    if (verbose_flag)
+	    {
+	        printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
+	        printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
+	    }
+	} else {
+	    // a "key way" passphrase read from keyfile
+	    rc = BN_hex2bn(&a_bn, passphrase.c_str());
 	}
-
 
 	// use dbid as exponent "p" number
 	BIGNUM *p_bn = BN_new();
@@ -159,6 +168,67 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 	BN_free(u_bn);
 	return retval;
 }
+
+void write_keyfile_openssl(std::string const& passphrase)
+{
+    unsigned char a_md5[MD5_DIGEST_LENGTH];
+    MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
+    BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
+    if (verbose_flag)
+    {
+        char *a_o_char(0);
+        printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
+        printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
+    }
+    char *a_md5_hex = BN_bn2hex(a_bn);
+	std::ofstream out("key.txt", std::ios::trunc);
+
+	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for(int i=0; i<MD5_DIGEST_LENGTH; i++)
+	{
+	    char c = a_md5_hex[i];
+		char j;
+	    if ('0' <= c && c <= '9')
+	        j = c - '0';
+	    else if ('a' <= c && c <= 'f')
+	        j = c - 'a' + 10;
+	    else if ('A' <= c && c <= 'F')
+	        j = c - 'A' + 10;
+	    else abort();
+		j = j ^ 0xF;
+		a_md5_hex[i] = hex_chars[j];
+	}
+	out << a_md5_hex;
+
+	out.close();
+}
+
+void read_keyfile_openssl(std::string &passphrase)
+{
+	std::string f = slurp("key.txt");
+	if (f.empty())
+		return;
+
+	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for (int i = 0; i<MD5_DIGEST_LENGTH; i++)
+	{
+		char c = f.at(i);
+		char j;
+		if ('0' <= c && c <= '9')
+			j = c - '0';
+		else if ('a' <= c && c <= 'f')
+			j = c - 'a' + 10;
+		else if ('A' <= c && c <= 'F')
+			j = c - 'A' + 10;
+		else abort();
+		j = j ^ 0xF;
+		c = hex_chars[j];
+		f[i] = c;
+	}
+
+	passphrase = f.c_str();
+}
+
 #endif
 
 #ifdef BOOST_FOUND

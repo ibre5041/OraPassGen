@@ -280,17 +280,6 @@ std::string slurp(const char *filename)
         sstr << in.rdbuf();
         return sstr.str();
     } else {
-        std::cerr << "File not found: " << N_FILE_DEC << std::endl;
-        exit(3);
+        return "";
     }
-}
-
-void write_keyfile(std::string const &)
-{
-
-}
-
-void read_keyfile(std::string &)
-{
-
 }

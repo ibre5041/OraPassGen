@@ -22,6 +22,7 @@ using namespace trotl;
 #include <vector>
 #include <ostream>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 #include "common.h"
@@ -58,6 +59,7 @@ int main(int argc, char *argv[])
 	string passphrase, dbid;
 	vector<string> usernames;
 	bool only_password(false);
+	bool show(true);
 	bool apply(false);
 	bool create_keyfile(false);
 
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "oachI:P:u:", long_options, &option_index);
+		int c = getopt_long (argc, argv, "oachI:P:u:v", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -150,7 +152,9 @@ int main(int argc, char *argv[])
 
 	if (passphrase.empty() && !create_keyfile)
 	{
-		read_keyfile(passphrase);
+	    READ_KEYFILE(passphrase);
+	    if (!passphrase.empty())
+	        show = false;
 	}
 
 	if (passphrase.empty())
@@ -160,12 +164,12 @@ int main(int argc, char *argv[])
 
 	if (create_keyfile)
 	{
-		write_keyfile(passphrase);
-		return 0;
+	    WRITE_KEYFILE(passphrase);
+	    return 0;
 	}
 
 #if defined(__unix__) && defined(ORACLE_FOUND)
-	if (dbid.empty())
+	if (dbid.empty() || apply)
 	try
 	{ // connect / as sysdba
 		OciEnvAlloc _envalloc;
@@ -210,6 +214,11 @@ int main(int argc, char *argv[])
 	if (n_str.empty())
 	{ // 2n read n from file		
 	    n_str = slurp(N_FILE_DEC);
+	    if (n_str.empty())
+	    {
+	        std::cerr << "File not found: " << N_FILE_DEC << std::endl;
+	        exit(3);
+	    }
 	}
 
 	if (usernames.empty())
@@ -234,17 +243,54 @@ int main(int argc, char *argv[])
 		//usernames.push_back("XDB");
 	}
 
+	vector<string> statements;
+
 	for (vector<string>::iterator it = usernames.begin(); it != usernames.end(); ++it)
 	{
-		std::string gen_password = GENPASSWD(dbid, *it, passphrase, n_str);
-
-		if (only_password)
-		{
-			std::cout << gen_password << std::endl;
-		}
-		else {
+		string gen_password = GENPASSWD(dbid, *it, passphrase, n_str);
+		if (show == false) {
+		    continue;
+		} else if (only_password) {
+			cout << gen_password << endl;
+		} else {
 			// Max username length is 30 CHARs
-			std::cout << " " << "alter user " << std::left << std::setw(30) << *it <<" identified by \"" << gen_password << "\";" << std::endl;
+	        stringstream statement;
+	        statement << "alter user " << left << setw(30) << *it <<" identified by \"" << gen_password << "\"";
+			cout << " " << statement.str() << ";" << endl;
+	        statements.push_back(statement.str());
 		}
 	}
+
+    if (apply)
+    {
+#if defined(__unix__) && defined(ORACLE_FOUND)
+        try
+        { // connect / as sysdba
+            OciEnvAlloc _envalloc;
+            OciEnv _env(_envalloc);
+            OciLogin _login(_env);
+            OciConnection _con(_env, _login);
+
+            for (vector<string>::iterator it = statements.begin(); it != statements.end(); ++it)
+            {
+                // try once again, skip missing users
+                try {
+                    SqlStatement q0(_con, *it);
+                    q0.eof();
+                    cout << endl << "User altered." << endl;
+                }
+                catch (OciException const& e)
+                {
+                    std::cerr << e.what();
+                }
+            }
+        }
+        catch (OciException const& e)
+        {
+            std::cerr << e.what();
+            return 1;
+        }
+#endif
+    }
+
 }
