@@ -53,7 +53,7 @@ ELSE()
    # library type OBJECTS is not yet understood
    # add_executable (opassgen opassgen.cpp dbutils.cpp ${common_sources} $<TARGET_OBJECTS:trotl>)
    add_executable (opassgen opassgen.cpp dbutils.cpp ${common_sources})
-   target_link_libraries(opassgen ${ORACLE_LIBRARIES} trotl)
+   target_link_libraries(opassgen ${ORACLE_LIBRARIES} trotl crypto)
 ENDIF()
 
 add_executable (genn genn.cpp ${common_sources})
