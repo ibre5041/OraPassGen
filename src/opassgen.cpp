@@ -248,16 +248,18 @@ int main(int argc, char *argv[])
 	for (vector<string>::iterator it = usernames.begin(); it != usernames.end(); ++it)
 	{
 		string gen_password = GENPASSWD(dbid, *it, passphrase, n_str);
+
+		stringstream statement;
+		// Max username length is 30 CHARs
+		statement << "alter user " << left << setw(30) << *it << " identified by \"" << gen_password << "\"";
+		statements.push_back(statement.str());
+
 		if (show == false) {
 		    continue;
 		} else if (only_password) {
 			cout << gen_password << endl;
 		} else {
-			// Max username length is 30 CHARs
-	        stringstream statement;
-	        statement << "alter user " << left << setw(30) << *it <<" identified by \"" << gen_password << "\"";
 			cout << " " << statement.str() << ";" << endl;
-	        statements.push_back(statement.str());
 		}
 	}
 
