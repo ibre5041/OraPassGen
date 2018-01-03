@@ -219,6 +219,7 @@ void DbPassGui::generatePressed()
 	p_Clipboard->setText(gen.c_str());
 	generatedPasswordEdit->setText(gen.c_str());
 	qApp->restoreOverrideCursor();
+	QTimer::singleShot(60000, this, SLOT(clearAll()));
 }
 
 void DbPassGui::createActions()
@@ -356,7 +357,7 @@ void DbPassGui::sidCleared(const QString &sid)
 void DbPassGui::setDbid(QString const& dbid)
 {
 	dbidEdit->setText(dbid);
-	QTimer::singleShot(30000, this, SLOT(clearAll()));
+	passphraseEdit->setFocus();
 }
 
 void DbPassGui::showConfigDialog()
