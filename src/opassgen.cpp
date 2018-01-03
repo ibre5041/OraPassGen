@@ -152,6 +152,13 @@ int main(int argc, char *argv[])
 
 	if (passphrase.empty() && !create_keyfile)
 	{
+		read_key_env(passphrase);
+		if (!passphrase.empty())
+			show = false;
+	}
+
+	if (passphrase.empty() && !create_keyfile)
+	{
 	    READ_KEYFILE(passphrase);
 	    if (!passphrase.empty())
 	        show = false;

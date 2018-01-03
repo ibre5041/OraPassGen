@@ -1,15 +1,6 @@
 #include "crypto.h"
 #include "common.h"
 
-#include <openssl/bn.h>
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
-
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include "md5.h"
 #include "sha224.h"
 
@@ -18,12 +9,47 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include <string.h>
 
 using namespace std;
 
+void read_key_env(std::string &passphrase)
+{
+	char *opass_key = getenv("OPASSGEN_KEY");
+	if (!opass_key || strlen(opass_key) != 32) // 32 = MD5_DIGEST_LENGTH*2
+		return;
+
+	string f(opass_key);
+	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for (int i = 0; i < 16; i++)
+	{
+		char c = f.at(i);
+		char j;
+		if ('0' <= c && c <= '9')
+			j = c - '0';
+		else if ('a' <= c && c <= 'f')
+			j = c - 'a' + 10;
+		else if ('A' <= c && c <= 'F')
+			j = c - 'A' + 10;
+		else abort();
+		j = j ^ 0xF;
+		c = hex_chars[j];
+		f[i] = c;
+	}
+	passphrase = f.c_str();
+}
+
+
 #ifdef OPENSSL_FOUND
+#include <openssl/bn.h>
+#include <openssl/md5.h>
+#include <openssl/sha.h>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+#include <openssl/buffer.h>
+
 string genpasswd_openssl(string const& dbid, string const& _username, string const& passphrase, string const& n_str)
 {
 	string username(_username);
@@ -232,6 +258,8 @@ void read_keyfile_openssl(std::string &passphrase)
 #endif
 
 #ifdef BOOST_FOUND
+#include <boost/multiprecision/cpp_int.hpp>
+
 // boost::multiprecision implementation
 // easier to read. but implementation is MUCH SLOWER than openssl big_num
 //
