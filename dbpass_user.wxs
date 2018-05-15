@@ -64,12 +64,101 @@
       <Component Id="Registration.xml" Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED88" DiskId="1">
 	<CreateFolder/>
 	<RemoveFolder Id="RemoveAppRootDirectory" On="uninstall" />
+	<RemoveFolder Id="Remove2" Directory="iconengines" On="uninstall" />
+	<RemoveFolder Id="Remove3" Directory="imageformats" On="uninstall" />
+	<RemoveFolder Id="Remove4" Directory="platforms" On="uninstall" />
+	<RemoveFolder Id="Remove5" Directory="translations" On="uninstall" />
+	
 	<File Id="opassgen.exe"        Name="opassgen.exe"     Source="src\$(var.BuildType)\opassgen.exe" />
 	<File Id="dbpassgui.exe"       Name="dbpassgui.exe"    Source="src\$(var.BuildType)\dbpassgui.exe" />
+
+        <File Id="Qt5Core.dll"         Name="Qt5Core.dll"      Source="src\$(var.BuildType)\Qt5Core.dll" />
+        <File Id="Qt5Gui.dll"          Name="Qt5Gui.dll"       Source="src\$(var.BuildType)\Qt5Gui.dll" />
+        <File Id="Qt5Network.dll"      Name="Qt5Network.dll"   Source="src\$(var.BuildType)\Qt5Network.dll" />
+        <File Id="Qt5Svg.dll"          Name="Qt5Svg.dll"       Source="src\$(var.BuildType)\Qt5Svg.dll" />
+        <File Id="Qt5Widgets.dll"      Name="Qt5Widgets.dll"   Source="src\$(var.BuildType)\Qt5Widgets.dll" />
+        <File Id="Qt5Xml.dll"          Name="Qt5Xml.dll"       Source="src\$(var.BuildType)\Qt5Xml.dll" />
+        <File Id="d3dcompiler_47.dll"  Name="d3dcompiler_47.dll" Source="src\$(var.BuildType)\d3dcompiler_47.dll" />
+        <File Id="libEGL.dll"          Name="libEGL.dll"       Source="src\$(var.BuildType)\libEGL.dll" />
+        <File Id="libGLESV2.dll"       Name="libGLESV2.dll"    Source="src\$(var.BuildType)\libGLESV2.dll" />
+        <File Id="opengl32sw.dll"      Name="opengl32sw.dll"   Source="src\$(var.BuildType)\opengl32sw.dll" />
+	
+	
 	<RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
 	  <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
 	</RegistryKey>
       </Component>
+
+      <Directory Id='bearer' Name='bearer'>
+	<Component Id='bearer' Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED90">
+	  <RemoveFolder Id="Remove1" Directory="bearer" On="uninstall" />
+          <File Id="qgenericbearer.dll"     Name="qgenericbearer.dll"    Source="src\$(var.BuildType)\bearer\qgenericbearer.dll" />
+          <File Id="qnativewifibearer.dll"  Name="qnativewifibearer.dll" Source="src\$(var.BuildType)\bearer\qnativewifibearer.dll" />
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+	    <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
+	  </RegistryKey>
+	</Component>
+      </Directory>
+
+      <Directory Id='iconengines' Name='iconengines'>
+	<Component Id='iconengines' Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED91">
+          <File Id="qsvgicon.dll"     Name="qsvgicon.dll"   Source="src\$(var.BuildType)\iconengines\qsvgicon.dll" />
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+	    <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
+	  </RegistryKey>
+	</Component>
+      </Directory>	
+
+      <Directory Id='imageformats' Name='imageformats'>
+	<Component Id='imageformats' Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED92">
+          <!-- <File Id="qdds.dll"         Name="qdds.dll"       Source="src\$(var.BuildType)\imageformats\qdds.dll" /> not present in Qt 5.10-->
+          <File Id="qgif.dll"         Name="qgif.dll"       Source="src\$(var.BuildType)\imageformats\qgif.dll" />
+          <File Id="qicns.dll"        Name="qicns.dll"      Source="src\$(var.BuildType)\imageformats\qicns.dll" />
+          <File Id="qico.dll"         Name="qico.dll"       Source="src\$(var.BuildType)\imageformats\qico.dll" />
+          <File Id="qjpeg.dll"        Name="qjpeg.dll"      Source="src\$(var.BuildType)\imageformats\qjpeg.dll" />
+          <File Id="qsvg.dll"         Name="qsvg.dll"       Source="src\$(var.BuildType)\imageformats\qsvg.dll" />
+          <File Id="qtga.dll"         Name="qtga.dll"       Source="src\$(var.BuildType)\imageformats\qtga.dll" />
+          <File Id="qtiff.dll"        Name="qtiff.dll"      Source="src\$(var.BuildType)\imageformats\qtiff.dll" />
+          <File Id="qwbmp.dll"        Name="qwbmp.dll"      Source="src\$(var.BuildType)\imageformats\qwbmp.dll" />
+          <File Id="qwebp.dll"        Name="qwebp.dll"      Source="src\$(var.BuildType)\imageformats\qwebp.dll" />
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+	    <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
+	  </RegistryKey>
+	</Component>
+      </Directory>
+
+
+      <Directory Id='platforms' Name='platforms'>
+	<Component Id='platforms' Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED93">
+          <File Id="qwindows.dll"     Name="qwindows.dll"   Source="src\$(var.BuildType)\platforms\qwindows.dll" />
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+	    <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
+	  </RegistryKey>
+	</Component>
+      </Directory>
+
+      <Directory Id='translations' Name='translations'>
+	<Component Id='translations' Guid="2C75FE26-3218-4B8A-ABCC-1508B65FED94">
+          <File Id="qt_ca.qm"         Name="qt_ca.qm"       Source="src\$(var.BuildType)\translations\qt_ca.qm" />
+          <File Id="qt_cs.qm"         Name="qt_cs.qm"       Source="src\$(var.BuildType)\translations\qt_cs.qm" />
+          <File Id="qt_de.qm"         Name="qt_de.qm"       Source="src\$(var.BuildType)\translations\qt_de.qm" />
+          <File Id="qt_en.qm"         Name="qt_en.qm"       Source="src\$(var.BuildType)\translations\qt_en.qm" />
+          <File Id="qt_fi.qm"         Name="qt_fi.qm"       Source="src\$(var.BuildType)\translations\qt_fi.qm" />
+          <File Id="qt_fr.qm"         Name="qt_fr.qm"       Source="src\$(var.BuildType)\translations\qt_fr.qm" />
+          <File Id="qt_he.qm"         Name="qt_he.qm"       Source="src\$(var.BuildType)\translations\qt_he.qm" />
+          <File Id="qt_hu.qm"         Name="qt_hu.qm"       Source="src\$(var.BuildType)\translations\qt_hu.qm" />
+          <File Id="qt_it.qm"         Name="qt_it.qm"       Source="src\$(var.BuildType)\translations\qt_it.qm" />
+          <File Id="qt_ja.qm"         Name="qt_ja.qm"       Source="src\$(var.BuildType)\translations\qt_ja.qm" />
+          <File Id="qt_ko.qm"         Name="qt_ko.qm"       Source="src\$(var.BuildType)\translations\qt_ko.qm" />
+          <File Id="qt_lv.qm"         Name="qt_lv.qm"       Source="src\$(var.BuildType)\translations\qt_lv.qm" />
+          <File Id="qt_ru.qm"         Name="qt_ru.qm"       Source="src\$(var.BuildType)\translations\qt_ru.qm" />
+          <File Id="qt_sk.qm"         Name="qt_sk.qm"       Source="src\$(var.BuildType)\translations\qt_sk.qm" />
+          <File Id="qt_uk.qm"         Name="qt_uk.qm"       Source="src\$(var.BuildType)\translations\qt_uk.qm" />
+	  <RegistryKey Root="HKCU" Key="Software\OraPassGen\OraPassGen"  ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes">
+	    <RegistryValue Name="Version" Value="[ProductVersion]" Type="string" KeyPath="yes"/>
+	  </RegistryKey>
+	</Component>
+      </Directory>
 
       <!-- This will be added into "Start" menu --> 
       <Directory Id="ProgramMenuFolder">
@@ -126,6 +215,11 @@
       <ComponentRef Id="ApplicationShortcuts" />
       <!--<ComponentRef Id="DesktopShortcut" /> -->
       <ComponentRef Id="OrapassgenAutostart" />
+      <ComponentRef Id='bearer' />
+      <ComponentRef Id='iconengines' />
+      <ComponentRef Id='imageformats' />
+      <ComponentRef Id='platforms' />
+      <ComponentRef Id='translations' />
     </Feature>
 
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" />
