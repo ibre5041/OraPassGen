@@ -1,0 +1,23 @@
+
+Versions tested:
+RHEL5, RHEL6, RHEL7
+
+Packages:
+yum install openssl-devel
+yum install cmake
+yum install boost-devel
+yum install libstdc++-devel
+(you also might need libstdc++.a)
+yum install libstdc++-static (on RHEL6)
+
+Configure:
+- Make check Oracle ORACLE_HOME is set
+- Generate libclntst*.a
+cd $ORACE_HOME/bin
+./genclntst
+
+cd OraPassGen
+cmake .
+
+Build:
+make
