@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 2.6) # 2.6 is present on RHEL6
 project (DBPASS)
 
+IF (NOT ${CMAKE_VERSION} VERSION_LESS "2.8.0") 
 CMAKE_POLICY(SET CMP0020 OLD)
+ENDIF()
 
 OPTION(BUILD_QT_GUI "Build also the gui part" OFF)
 OPTION(BUILD_STATIC "Static link" ON)
@@ -106,7 +108,10 @@ INCLUDE_DIRECTORIES(
 SET(TROTL_DLL_DEFINES    -DLOKI_STATIC -DEXPLICIT_EXPORT -DTROTL_MAKE_DLL)
 SET(TROTL_CLIENT_DEFINES -DLOKI_STATIC -DEXPLICIT_EXPORT -DTROTL_DLL)
 
-FIND_PACKAGE(Git)
+IF (NOT ${CMAKE_VERSION} VERSION_LESS "2.8.0") 
+  FIND_PACKAGE(Git)
+ENDIF()
+
 IF(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
   # a custom target that is always built
   ADD_CUSTOM_TARGET(revisiontag ALL)
@@ -131,9 +136,9 @@ ELSE()
   if(EXISTS {CMAKE_CURRENT_SOURCE_DIR}/gitrevision.h)
     add_definitions("-DHAVE_GITREVISION_H=1")
   else()
-    file(WRITE  ${CMAKE_BINARY_DIR}/toversion.h "#pragma once\n")
-    file(APPEND ${CMAKE_BINARY_DIR}/toversion.h "#define OPG_VERSION \"${VERSION}\"\n")
-    file(APPEND ${CMAKE_BINARY_DIR}/toversion.h "#define OPG_BUILDTYPE_RELEASE \"Release\"\n")
+    file(WRITE  ${CMAKE_BINARY_DIR}/version.h "#pragma once\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define OPG_VERSION \"${VERSION}\"\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define OPG_BUILDTYPE_RELEASE \"Release\"\n")
   endif()
 ENDIF()
 

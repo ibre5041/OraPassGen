@@ -36,18 +36,25 @@
 #include "trotl_parser.h"
 
 #include <boost/bind.hpp>
-//#include <boost/spirit.hpp>
-#include <boost/spirit/include/classic.hpp>
-//#include <boost/spirit/actor/clear_actor.hpp>
-#include <boost/spirit/include/classic_clear_actor.hpp>
-#include <boost/function.hpp>
+#include <boost/version.hpp>
 
+#if BOOST_VERSION >= 105000
+	#include <boost/spirit/include/classic.hpp>
+	#include <boost/spirit/include/classic_clear_actor.hpp>
+	using namespace boost::spirit::classic;
+#else
+	#include <boost/spirit.hpp>
+	#include <boost/spirit/actor/clear_actor.hpp>
+	using namespace boost::spirit;
+#endif
+
+#include <boost/function.hpp>
 #include <algorithm>
 
 namespace trotl
 {
 
-using namespace boost::spirit::classic;
+
 
 bool SimplePlsqlParser::parse (const tstring &statement)
 {
@@ -148,7 +155,12 @@ bool SimplePlsqlParser::parse (const tstring &statement)
 	rule<> eq_cl = ( (ch_p(':') >> ch_p('=') ))
 	               [boost::bind(&SimplePlsqlParser::token_callback, boost::ref(*this), "eq", _1, _2)];
 
+#if BOOST_VERSION >= 105000
 	bool p = boost::spirit::classic::parse(statement.c_str(),
+#else
+	bool p = boost::spirit::parse(statement.c_str(),
+#endif
+
 // Note: as_lower_d wont compile on 64bit linux if BOOST_VERSION < 1.37.0
 #if (BOOST_VERSION >= 103700)
 	                                       as_lower_d[(
