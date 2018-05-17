@@ -257,7 +257,7 @@ void read_keyfile_openssl(std::string &passphrase)
 
 #endif
 
-#ifdef BOOST_FOUND
+#if(BOOST_FOUND && 0)
 #include <boost/multiprecision/cpp_int.hpp>
 
 // boost::multiprecision implementation
