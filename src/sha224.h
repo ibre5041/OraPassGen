@@ -39,6 +39,10 @@
 
 #include <string>
 
+#ifndef SHA224_DIGEST_LENGTH
+#define SHA224_DIGEST_LENGTH   28
+#endif
+
 namespace Crypto
 {
 
