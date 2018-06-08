@@ -431,16 +431,22 @@ string genpasswd_mpir(string const& dbid, string const& _username, string const&
 	string username(_username);
 	transform(username.begin(), username.end(), username.begin(), ::toupper);
 
+	// use password hash as number "a"
 	Crypto::MD5 A_MD5(passphrase);
 	mpz_t a;
 	mpz_init(a);
-	mpz_import (a, 16, 1, 1, 0, 0, A_MD5.bindigest());
-	mpz_class A(a);
-	if (verbose_flag)
+	if (passphrase.size() != MD5_DIGEST_LENGTH*2)
 	{
-		std::cout << "A " << A_MD5.hexdigest() << std::endl;	
-		std::cout << "A " << A << std::endl;
+		mpz_import (a, 16, 1, 1, 0, 0, A_MD5.bindigest());
+		if (verbose_flag)
+		{
+			std::cout << "A " << A_MD5.hexdigest() << std::endl;	
+		}		
+	} else {
+		mpz_import (a, 16, 1, 1, 0, 0, hex2bytes(passphrase.c_str()).data());
 	}
+	mpz_class A(a);
+	std::cout << "A " << A << std::endl;
 
 	// use dbid as exponent "p" number
 	mpz_class P(dbid);
