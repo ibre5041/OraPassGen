@@ -24,7 +24,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 FIND_PACKAGE(Boost 1.58.0)
 FIND_PACKAGE(OpenSSL)
-FIND_PACKAGE(GMP)
+FIND_PACKAGE(MPIR)
 FIND_PACKAGE(Oracle COMPONENTS CLNTST)
 
 if(Boost_FOUND)
@@ -37,9 +37,9 @@ if(OPENSSL_FOUND)
   include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
-if(GMP_FOUND)
-  add_definitions(-DGMP_FOUND)
-  include_directories(${GMP_INCLUDE_DIRS})
+if(MPIR_FOUND)
+  add_definitions(-DMPIR_FOUND)
+  include_directories(${MPIR_INCLUDE_DIRS})
 endif()
 
 message(STATUS "build gui ${BUILD_QT_GUI}")
