@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #if defined(_MSC_VER)
 #include <BaseTsd.h>
@@ -29,3 +30,5 @@ std::string version_string();
 void prompt_passphrase(std::string &);
 
 std::string slurp(const char*);
+
+std::vector<char> hex2bytes(const std::string& hex);
