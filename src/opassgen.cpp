@@ -1,11 +1,8 @@
 
-#include <openssl/bn.h>
-#include <openssl/md5.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #ifndef _WIN32
 #include <getopt.h>
@@ -154,14 +151,14 @@ int main(int argc, char *argv[])
 	{
 		read_key_env(passphrase);
 		if (!passphrase.empty())
-			show = false;
+			verbose_flag = show = false;
 	}
 
 	if (passphrase.empty() && !create_keyfile)
 	{
-	    READ_KEYFILE(passphrase);
-	    if (!passphrase.empty())
-	        show = false;
+		read_keyfile(passphrase);
+		if (!passphrase.empty())
+			verbose_flag = show = false;
 	}
 
 	if (passphrase.empty())
@@ -171,8 +168,8 @@ int main(int argc, char *argv[])
 
 	if (create_keyfile)
 	{
-	    WRITE_KEYFILE(passphrase);
-	    return 0;
+		write_keyfile(passphrase);
+		return 0;
 	}
 
 #if defined(__unix__) && defined(ORACLE_FOUND)
@@ -206,7 +203,8 @@ int main(int argc, char *argv[])
 #endif
 
 	string n_str;
-#ifdef __linux__	
+#ifdef __linux__
+#if 0
 	void* elf_handle = dlopen(0,RTLD_NOW|RTLD_GLOBAL); // dlopen self
 	// - generate factor file:           genn --decimal -f n.txt
 	// - compile n.txt into .elf format: objcopy --input binary --output elf64-x86-64 --binary-architecture i386 resources/n.txt n.o
@@ -216,6 +214,12 @@ int main(int argc, char *argv[])
 	if (n_len)
 	{ // 1st check whether n was compiled into this binary		
 		n_str = std::string(n_data, n_len);
+	}
+#endif
+	{
+		char* s = &_binary_resources_n_txt_start;
+		char* e = &_binary_resources_n_txt_end;
+		n_str = std::string(s, e-s);
 	}
 #endif
 	if (n_str.empty())
@@ -251,6 +255,7 @@ int main(int argc, char *argv[])
 	}
 
 	vector<string> statements;
+	vector<string> passwords;
 
 	for (vector<string>::iterator it = usernames.begin(); it != usernames.end(); ++it)
 	{
@@ -260,46 +265,54 @@ int main(int argc, char *argv[])
 		// Max username length is 30 CHARs
 		statement << "alter user " << left << setw(30) << *it << " identified by \"" << gen_password << "\"";
 		statements.push_back(statement.str());
+		passwords.push_back(gen_password);
 
+#if defined(__unix__) && defined(ORACLE_FOUND)
 		if (show == false) {
-		    continue;
+			continue;
 		} else if (only_password) {
 			cout << gen_password << endl;
 		} else {
 			cout << " " << statement.str() << ";" << endl;
 		}
+#endif
 	}
 
-    if (apply)
-    {
 #if defined(__unix__) && defined(ORACLE_FOUND)
-        try
-        { // connect / as sysdba
-            OciEnvAlloc _envalloc;
-            OciEnv _env(_envalloc);
-            OciLogin _login(_env);
-            OciConnection _con(_env, _login);
+	if (apply)
+	{
+		try
+		{ // connect / as sysdba
+			OciEnvAlloc _envalloc;
+			OciEnv _env(_envalloc);
+			OciLogin _login(_env);
+			OciConnection _con(_env, _login);
 
-            for (vector<string>::iterator it = statements.begin(); it != statements.end(); ++it)
-            {
-                // try once again, skip missing users
-                try {
-                    SqlStatement q0(_con, *it);
-                    q0.eof();
-                    cout << endl << "User altered." << endl;
-                }
-                catch (OciException const& e)
-                {
-                    std::cerr << e.what();
-                }
-            }
-        }
-        catch (OciException const& e)
-        {
-            std::cerr << e.what();
-            return 1;
-        }
+			for (vector<string>::iterator it = statements.begin(); it != statements.end(); ++it)
+			{
+				// try once again, skip missing users
+				try {
+					SqlStatement q0(_con, *it);
+					q0.eof();
+					cout << endl << "User altered." << endl;
+				}
+				catch (OciException const& e)
+				{
+					std::cerr << e.what();
+				}
+			}
+		}
+		catch (OciException const& e)
+		{
+			std::cerr << e.what();
+			return 1;
+		}
+	}
+#else
+	for (vector<string>::iterator it = passwords.begin(); it != passwords.end(); ++it)
+	{
+		cout << *it << endl;
+	}
 #endif
-    }
 
 }
