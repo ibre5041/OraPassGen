@@ -22,19 +22,24 @@ SET(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 #Set the custom CMake module directory where our include/lib finders are
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-FIND_PACKAGE(Boost 1.33.0)
+FIND_PACKAGE(Boost 1.58.0)
 FIND_PACKAGE(OpenSSL)
 FIND_PACKAGE(GMP)
 FIND_PACKAGE(Oracle COMPONENTS CLNTST)
 
 if(Boost_FOUND)
   add_definitions(-DBOOST_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
 endif()
+
 if(OPENSSL_FOUND)
   add_definitions(-DOPENSSL_FOUND)
+  include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
+
 if(GMP_FOUND)
   add_definitions(-DGMP_FOUND)
+  include_directories(${GMP_INCLUDE_DIRS})
 endif()
 
 message(STATUS "build gui ${BUILD_QT_GUI}")
@@ -100,9 +105,6 @@ INCLUDE_DIRECTORIES(
 	src/loki/include
 	${ORACLE_INCLUDES}
 	${QT_INCLUDES}
-	${OPENSSL_INCLUDE_DIR}
-	${Boost_INCLUDE_DIRS}
-#	${GMP_INCLUDE_DIRS}
 	)
 
 SET(TROTL_DLL_DEFINES    -DLOKI_STATIC -DEXPLICIT_EXPORT -DTROTL_MAKE_DLL)
