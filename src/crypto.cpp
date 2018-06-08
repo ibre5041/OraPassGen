@@ -41,6 +41,57 @@ void read_key_env(std::string &passphrase)
 	passphrase = f.c_str();
 }
 
+void write_keyfile(std::string const& passphrase)
+{
+	Crypto::MD5 MD5(passphrase);
+	std::string a_md5_hex = MD5.hexdigest();
+	std::ofstream out("key.txt", std::ios::trunc);
+
+	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for(int i=0; i<MD5_DIGEST_LENGTH; i++)
+	{
+		char c = a_md5_hex[i];
+		char j;
+		if ('0' <= c && c <= '9')
+			j = c - '0';
+		else if ('a' <= c && c <= 'f')
+			j = c - 'a' + 10;
+		else if ('A' <= c && c <= 'F')
+			j = c - 'A' + 10;
+		else abort();
+		j = j ^ 0xF;
+		a_md5_hex[i] = hex_chars[j];
+	}
+	out << a_md5_hex;
+
+	out.close();
+};
+
+void read_keyfile(std::string &passphrase)
+{
+	std::string f = slurp("key.txt");
+	if (f.empty())
+		return;
+
+	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for (int i = 0; i<MD5_DIGEST_LENGTH; i++)
+	{
+		char c = f.at(i);
+		char j;
+		if ('0' <= c && c <= '9')
+			j = c - '0';
+		else if ('a' <= c && c <= 'f')
+			j = c - 'a' + 10;
+		else if ('A' <= c && c <= 'F')
+			j = c - 'A' + 10;
+		else abort();
+		j = j ^ 0xF;
+		c = hex_chars[j];
+		f[i] = c;
+	}
+
+	passphrase = f.c_str();
+};
 
 #ifdef OPENSSL_FOUND
 #include <openssl/bn.h>
