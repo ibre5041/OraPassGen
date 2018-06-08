@@ -22,9 +22,9 @@ include_directories(win32)
 endif ()
 
 set(common_libs ${OPENSSL_LIBRARIES} ${MPIRXX_LIBRARIES_STATIC} ${MPIR_LIBRARIES_STATIC})
-IF (ORACLE_FOUND)
+IF (ORACLE_FOUND AND NOT WIN32)
    LIST(APPEND common_libs "-Wl,--whole-archive" ${ORACLE_STATIC_LIBRARIES} trotl "-Wl,--no-whole-archive")
-ENDIF(ORACLE_FOUND)
+ENDIF()
 
 add_definitions("-DTROTL_DLL")
 
