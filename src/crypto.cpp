@@ -12,6 +12,7 @@
 #include <cstdlib>
 
 #include <string.h>
+#include <limits.h>
 
 using namespace std;
 
@@ -246,66 +247,6 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 	return retval;
 }
 
-void write_keyfile_openssl(std::string const& passphrase)
-{
-    unsigned char a_md5[MD5_DIGEST_LENGTH];
-    MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
-    BIGNUM *a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
-    if (verbose_flag)
-    {
-        char *a_o_char(0);
-        printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
-        printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
-    }
-    char *a_md5_hex = BN_bn2hex(a_bn);
-	std::ofstream out("key.txt", std::ios::trunc);
-
-	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-	for(int i=0; i<MD5_DIGEST_LENGTH; i++)
-	{
-	    char c = a_md5_hex[i];
-		char j;
-	    if ('0' <= c && c <= '9')
-	        j = c - '0';
-	    else if ('a' <= c && c <= 'f')
-	        j = c - 'a' + 10;
-	    else if ('A' <= c && c <= 'F')
-	        j = c - 'A' + 10;
-	    else abort();
-		j = j ^ 0xF;
-		a_md5_hex[i] = hex_chars[j];
-	}
-	out << a_md5_hex;
-
-	out.close();
-}
-
-void read_keyfile_openssl(std::string &passphrase)
-{
-	std::string f = slurp("key.txt");
-	if (f.empty())
-		return;
-
-	char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-	for (int i = 0; i<MD5_DIGEST_LENGTH; i++)
-	{
-		char c = f.at(i);
-		char j;
-		if ('0' <= c && c <= '9')
-			j = c - '0';
-		else if ('a' <= c && c <= 'f')
-			j = c - 'a' + 10;
-		else if ('A' <= c && c <= 'F')
-			j = c - 'A' + 10;
-		else abort();
-		j = j ^ 0xF;
-		c = hex_chars[j];
-		f[i] = c;
-	}
-
-	passphrase = f.c_str();
-}
-
 #endif
 
 #if(BOOST_FOUND && 0)
@@ -420,7 +361,7 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
 }
 #endif
 
-#ifdef GMP_FOUND
+#ifdef MPIR_FOUND
 
 #include <mpirxx.h>
 #include <mpir.h>
@@ -446,7 +387,6 @@ string genpasswd_mpir(string const& dbid, string const& _username, string const&
 		mpz_import (a, 16, 1, 1, 0, 0, hex2bytes(passphrase.c_str()).data());
 	}
 	mpz_class A(a);
-	std::cout << "A " << A << std::endl;
 
 	// use dbid as exponent "p" number
 	mpz_class P(dbid);
