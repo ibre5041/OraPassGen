@@ -21,7 +21,10 @@ if(WIN32)
 include_directories(win32)
 endif ()
 
-set(common_libs ${OPENSSL_LIBRARIES})
+set(common_libs ${OPENSSL_LIBRARIES} ${MPIRXX_LIBRARIES_STATIC} ${MPIR_LIBRARIES_STATIC})
+IF (ORACLE_FOUND)
+   LIST(APPEND common_libs "-Wl,--whole-archive" ${ORACLE_STATIC_LIBRARIES} trotl "-Wl,--no-whole-archive")
+ENDIF(ORACLE_FOUND)
 
 add_definitions("-DTROTL_DLL")
 
@@ -40,14 +43,14 @@ ELSEIF(BUILD_STATIC)
    get_filename_component(LIB_CPP_STATIC ${LIB_CPP_STATIC_PATH} NAME)
 
    add_executable (opassgen opassgen.cpp dbutils.cpp ${common_sources} n.o)
-   target_link_libraries(opassgen "-static-libgcc"
+   target_link_libraries(opassgen
      -L. ${LIB_CPP_STATIC}
      ${common_libs}
-     ${ORACLE_STATIC_LIBRARIES}
-     "-Wl,--whole-archive" trotl "-Wl,--no-whole-archive"
-     #${MPIRXX_LIBRARIES_STATIC}
-     #${MPIR_LIBRARIES_STATIC}
-     pthread dl)
+     pthread dl # needed by openssl(plugins)
+     )
+   # for fully static build use: (no openssl, just mpir)
+   # g++ -static -static-libstdc++ -static-libgcc -Wall -ggdb3    CMakeFiles/opassgen.dir/*.o n.o  -o opassgen  /usr/local/lib/libmpirxx.a /usr/local/lib/libmpir.a
+   #
 ELSE()
    # cmake 3.0 (not present on RHEL)
    # library type OBJECTS is not yet understood
@@ -56,8 +59,10 @@ ELSE()
    target_link_libraries(opassgen ${ORACLE_LIBRARIES} trotl crypto)
 ENDIF()
 
-add_executable (genn genn.cpp ${common_sources})
-target_link_libraries(genn ${common_libs})
+IF(OPENSSL_FOUND)
+   add_executable (genn genn.cpp ${common_sources})
+   target_link_libraries(genn ${common_libs})
+ENDIF()
 
 IF(BUILD_QT_GUI)
 IF (WIN32 AND MSVC)
