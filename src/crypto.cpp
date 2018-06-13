@@ -249,7 +249,7 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 
 #endif
 
-#if(BOOST_FOUND && 0)
+#if(BOOST_FOUND)
 #include <boost/multiprecision/cpp_int.hpp>
 
 // boost::multiprecision implementation
@@ -272,21 +272,26 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
         }
         boost::multiprecision::import_bits(A, v.begin(), v.end());
     }
-    std::cout << "A " << A_MD5.hexdigest() << std::endl;
-    std::cout << "A " << A << std::endl;
-
+    if (verbose_flag)
+    {
+	    std::cout << "A " << A_MD5.hexdigest() << std::endl;
+	    std::cout << "A " << A << std::endl;
+    }
 
     // use dbid as exponent "p" number
     boost::multiprecision::cpp_int P(dbid);
-    std::cout << "P " << P << std::endl;
+    if (verbose_flag)
+	std::cout << "P " << P << std::endl;
 
     // convert n_str into n number
     boost::multiprecision::cpp_int N(n_str);
-    std::cout << "N " << N << std::endl;
+    if (verbose_flag)
+	std::cout << "N " << N << std::endl;
 
     // compute r = a ^ p mod n
     boost::multiprecision::cpp_int R = powm(A, P, N);
-    std::cout << "R " << R << std::endl;
+    if (verbose_flag)
+	std::cout << "R " << R << std::endl;
 
 
     // use username hash as number "u"
@@ -301,9 +306,11 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
         }
         boost::multiprecision::import_bits(U, v.begin(), v.end());
     }
-    std::cout << "U " << U_MD5.hexdigest() << std::endl;
-    std::cout << "U " << U << std::endl;
-
+    if (verbose_flag)
+    {
+	    std::cout << "U " << U_MD5.hexdigest() << std::endl;
+	    std::cout << "U " << U << std::endl;
+    }
     boost::multiprecision::cpp_int R1 = R;
     R = powm(R1, U, N);
 
@@ -314,9 +321,11 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
         R1 = R;
         R = powm(A, R1, N);
     }
-    std::cout << "R " << R << std::endl;
-    std::cout << "R1 " << R1 << std::endl;
-
+    if (verbose_flag)
+    {
+	    std::cout << "R " << R << std::endl;
+	    std::cout << "R1 " << R1 << std::endl;
+    }
     // compute sha(r)
     std::string v;
     boost::multiprecision::export_bits(R, std::back_inserter(v), 8);
@@ -353,8 +362,8 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
             r2_m_char[2] = '0';
     }
 
-
-    std::cout << "r2 " << r2_m_char << std::endl;
+    if (verbose_flag)
+	    std::cout << "r2 " << r2_m_char << std::endl;
 
     retval = r2_m_char;
     return retval;
