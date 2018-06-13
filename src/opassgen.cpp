@@ -224,14 +224,18 @@ int main(int argc, char *argv[])
 #endif
 	if (n_str.empty())
 	{ // 2n read n from file		
-	    n_str = slurp(N_FILE_DEC);
-	    if (n_str.empty())
-	    {
-	        std::cerr << "File not found: " << N_FILE_DEC << std::endl;
-	        exit(3);
-	    }
+		n_str = slurp(N_FILE_DEC);
+		if (n_str.empty())
+		{
+			std::cerr << "File not found: " << N_FILE_DEC << std::endl;
+			exit(3);
+		}
 	}
-
+	if (n_str[n_str.size()-1] == '\n')
+	{
+		n_str = n_str.substr(0, n_str.size()-1); // c++11 n_str.pop_back();
+	}
+	
 	if (usernames.empty())
 	{
 		usernames.push_back("SYS");
