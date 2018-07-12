@@ -339,7 +339,7 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
     std::string v;
     boost::multiprecision::export_bits(R, std::back_inserter(v), 8);
     Crypto::SHA224 R2_SHA224(v);
-    std::string R2_bin((const char*)R2_SHA224.bindigest());
+    std::string R2_bin((const char*)R2_SHA224.bindigest(), SHA224_DIGEST_LENGTH);
 
     size_t r2_len;
     char *r2_m_char = base64_encode((const unsigned char *)R2_bin.c_str(), SHA224_DIGEST_LENGTH, &r2_len);
@@ -460,7 +460,7 @@ string genpasswd_mpir(string const& dbid, string const& _username, string const&
 
 	std::string v(buff, size);
 	Crypto::SHA224 R2_SHA224(v);
-	std::string R2_bin((const char*)R2_SHA224.bindigest());
+	std::string R2_bin((const char*)R2_SHA224.bindigest(), SHA224_DIGEST_LENGTH);
 
 	size_t r2_len;
 	char *r2_m_char = base64_encode((const unsigned char *)R2_bin.c_str(), SHA224_DIGEST_LENGTH, &r2_len);
