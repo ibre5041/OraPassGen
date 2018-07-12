@@ -120,14 +120,14 @@ string genpasswd_openssl(string const& dbid, string const& _username, string con
 	    // usual way passphrase passed from users input
 	    MD5((unsigned char*)passphrase.c_str(), passphrase.size(), a_md5);
 	    a_bn = BN_bin2bn(a_md5, MD5_DIGEST_LENGTH, NULL);
-	    if (verbose_flag)
-	    {
-	        printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
-	        printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
-	    }
 	} else {
 	    // a "key way" passphrase read from keyfile
 	    rc = BN_hex2bn(&a_bn, passphrase.c_str());
+	}
+	if (verbose_flag)
+	{
+		printf("a %s\n", a_o_char = BN_bn2hex(a_bn));
+		printf("a %s\n", a_o_char = BN_bn2dec(a_bn));
 	}
 
 	// use dbid as exponent "p" number
@@ -262,21 +262,30 @@ string genpasswd_boost(string const& dbid, string const& _username, string const
     string username(_username);
     transform(username.begin(), username.end(), username.begin(), ::toupper);
 
-    Crypto::MD5 A_MD5(passphrase);
-    boost::multiprecision::cpp_int A;
-    {
-        std::vector<unsigned char> v;
-        for(unsigned i=0; i < 16; ++i)
-        {
-            v.push_back(A_MD5.bindigest()[i]);
-        }
-        boost::multiprecision::import_bits(A, v.begin(), v.end());
-    }
-    if (verbose_flag)
-    {
-	    std::cout << "A " << A_MD5.hexdigest() << std::endl;
-	    std::cout << "A " << A << std::endl;
-    }
+	boost::multiprecision::cpp_int A;
+
+	if (passphrase.size() != MD5_DIGEST_LENGTH * 2)
+	{
+		// usual way passphrase passed from users input
+		Crypto::MD5 A_MD5(passphrase);
+		std::vector<unsigned char> v;
+		for (unsigned i = 0; i < 16; ++i)
+		{
+			v.push_back(A_MD5.bindigest()[i]);
+		}
+		boost::multiprecision::import_bits(A, v.begin(), v.end());
+		if (verbose_flag)
+			std::cout << "A " << A_MD5.hexdigest() << std::endl;
+	}
+	else {
+		// a "key way" passphrase read from keyfile
+		std::vector<unsigned char> v = hex2bytes(passphrase.c_str());
+		boost::multiprecision::import_bits(A, v.begin(), v.end());
+		if (verbose_flag)
+			std::cout << "A " << passphrase << std::endl;
+	}
+	std::cout << "A " << A << std::endl;
+
 
     // use dbid as exponent "p" number
     boost::multiprecision::cpp_int P(dbid);
