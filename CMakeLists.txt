@@ -22,7 +22,7 @@ SET(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 #Set the custom CMake module directory where our include/lib finders are
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-FIND_PACKAGE(Boost 1.58.0)
+FIND_PACKAGE(Boost 1.63.0)
 FIND_PACKAGE(OpenSSL)
 FIND_PACKAGE(MPIR)
 FIND_PACKAGE(Oracle COMPONENTS CLNTST)
