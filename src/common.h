@@ -31,4 +31,4 @@ void prompt_passphrase(std::string &);
 
 std::string slurp(const char*);
 
-std::vector<char> hex2bytes(const std::string& hex);
+std::vector<unsigned char> hex2bytes(const std::string& hex);
